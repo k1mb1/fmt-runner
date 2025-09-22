@@ -6,20 +6,21 @@ use serde::{de::DeserializeOwned, Serialize};
 use std::marker::PhantomData;
 
 
-pub struct Engine<'a, L: LanguageProvider, C>
+pub struct Engine<Language: LanguageProvider, Config>
 where
-    C: Serialize + DeserializeOwned + 'a,
+    Config: Serialize + DeserializeOwned,
 {
-    pub pipeline: Pipeline<'a, C>,
-    pub parser: Parser<L>,
-    _marker: PhantomData<(L, C)>,
+    pub pipeline: Pipeline<Config>,
+    pub parser: Parser<Language>,
+    _marker: PhantomData<(Language, Config)>,
 }
 
-impl<'a, L: LanguageProvider, C> Engine<'a, L, C>
+
+impl<Language: LanguageProvider, Config> Engine<Language, Config>
 where
-    C: Serialize + DeserializeOwned + 'a,
+    Config: Serialize + DeserializeOwned,
 {
-    pub fn new(pipeline: Pipeline<'a, C>) -> Self {
+    pub fn new(pipeline: Pipeline<Config>) -> Self {
         Self {
             pipeline,
             parser: Parser::new(),
@@ -27,7 +28,7 @@ where
         }
     }
 
-    fn run(&mut self, config: &C, state: &mut ParseState) {
+    fn run(&mut self, config: &Config, state: &mut ParseState) {
         if state.tree().is_none() {
             self.parser.parse(state);
         }
@@ -48,7 +49,7 @@ where
         }
     }
 
-    pub fn start(&mut self, config: &C, codes: &[String]) {
+    pub fn start(&mut self, config: &Config, codes: &[String]) {
         for (i, code) in codes.iter().enumerate() {
             let mut state = ParseState::new(code.to_string());
             self.run(config, &mut state);

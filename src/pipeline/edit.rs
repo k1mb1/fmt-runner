@@ -4,6 +4,7 @@ pub struct Edit {
     pub content: String,
 }
 
+
 pub struct EditTarget<T> {
     pub range: (usize, usize),
     pub items: Vec<T>,

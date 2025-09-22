@@ -7,6 +7,7 @@ pub struct ParseState {
     pub(crate) tree: Option<Tree>,
 }
 
+
 impl ParseState {
     /// Create a new parse state with the given source.
     pub fn new(source: String) -> Self {

@@ -5,17 +5,18 @@ use tree_sitter::{InputEdit, Parser as TsParser};
 
 /// Generic parser that owns a tree-sitter parser.
 /// The source and tree are managed separately in ParseState.
-pub struct Parser<L: LanguageProvider> {
+pub struct Parser<Language: LanguageProvider> {
     ts_parser: TsParser,
-    _marker: std::marker::PhantomData<L>,
+    _marker: std::marker::PhantomData<Language>,
 }
 
-impl<L: LanguageProvider> Parser<L> {
+
+impl<Language: LanguageProvider> Parser<Language> {
     /// Create a new parser for the language.
     pub fn new() -> Self {
         let mut ts_parser = TsParser::new();
         ts_parser
-            .set_language(&L::language())
+            .set_language(&Language::language())
             .expect("Error loading grammar");
 
         Self {
@@ -42,7 +43,7 @@ impl<L: LanguageProvider> Parser<L> {
         state: &mut ParseState,
         start_byte: usize,
         old_end_byte: usize,
-        new_text: &String,
+        new_text: &str,
     ) {
         state
             .source
@@ -68,5 +69,12 @@ impl<L: LanguageProvider> Parser<L> {
             tree.edit(&edit);
         }
         self.reparse(state);
+    }
+}
+
+
+impl<Language: LanguageProvider> Default for Parser<Language> {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -1,8 +1,8 @@
 mod edit;
 mod pass;
-mod pipeline;
+mod pipeline_core;
 
 
 pub use edit::{Edit, EditTarget};
 pub use pass::{Pass, StructuredPass};
-pub use pipeline::Pipeline;
+pub use pipeline_core::Pipeline;
