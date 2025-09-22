@@ -3,5 +3,5 @@ mod init;
 mod utils;
 
 
-pub use format::run as format;
-pub use init::run as init;
+pub use format::execute as format;
+pub use init::execute as init;

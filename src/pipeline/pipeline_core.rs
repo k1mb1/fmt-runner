@@ -6,7 +6,7 @@ pub struct Pipeline<Config>
 where
     Config: Serialize + DeserializeOwned,
 {
-    pub(crate) passes: Vec<Box<dyn Pass<Config>>>,
+    passes: Vec<Box<dyn Pass<Config>>>,
 }
 
 
@@ -24,6 +24,21 @@ where
     {
         self.passes.push(Box::new(pass));
         self
+    }
+
+    /// Get a reference to the passes
+    pub fn passes(&self) -> &[Box<dyn Pass<Config>>] {
+        &self.passes
+    }
+
+    /// Get the number of passes
+    pub fn len(&self) -> usize {
+        self.passes.len()
+    }
+
+    /// Check if the pipeline is empty
+    pub fn is_empty(&self) -> bool {
+        self.passes.is_empty()
     }
 }
 

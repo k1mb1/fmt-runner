@@ -3,7 +3,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use std::path::PathBuf;
 
 
-pub fn run<Config>(config_path: PathBuf)
+pub fn execute<Config>(config_path: PathBuf)
 where
     Config: Serialize + DeserializeOwned + Default,
 {

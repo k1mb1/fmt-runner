@@ -9,7 +9,7 @@ use serde::Serialize;
 use std::path::PathBuf;
 
 
-pub fn run<Language, Config>(
+pub fn execute<Language, Config>(
     config_path: PathBuf,
     files_path: Vec<PathBuf>,
     pipeline: Pipeline<Config>,

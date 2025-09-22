@@ -18,6 +18,8 @@ impl SupportedExtension {
     }
 
     /// Returns true if the given extension (case-insensitive, without dot) is supported.
+    /// 
+    /// This is a private helper method used by the public `matches` method.
     fn contains(&self, extension: &str) -> bool {
         let ext = extension.to_ascii_lowercase();
         self.extensions.iter().any(|&e| e == ext)
@@ -29,6 +31,21 @@ impl SupportedExtension {
             Some(ext) => self.contains(ext),
             None => false,
         }
+    }
+
+    /// Get the list of supported extensions
+    pub fn extensions(&self) -> &[&str] {
+        self.extensions
+    }
+
+    /// Get the number of supported extensions
+    pub fn len(&self) -> usize {
+        self.extensions.len()
+    }
+
+    /// Check if this set is empty
+    pub fn is_empty(&self) -> bool {
+        self.extensions.is_empty()
     }
 }
 

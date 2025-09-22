@@ -10,7 +10,6 @@ pub struct Parser<Language: LanguageProvider> {
     _marker: std::marker::PhantomData<Language>,
 }
 
-
 impl<Language: LanguageProvider> Parser<Language> {
     /// Create a new parser for the language.
     pub fn new() -> Self {
@@ -71,7 +70,6 @@ impl<Language: LanguageProvider> Parser<Language> {
         self.reparse(state);
     }
 }
-
 
 impl<Language: LanguageProvider> Default for Parser<Language> {
     fn default() -> Self {

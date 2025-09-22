@@ -10,8 +10,8 @@ pub struct Engine<Language: LanguageProvider, Config>
 where
     Config: Serialize + DeserializeOwned,
 {
-    pub pipeline: Pipeline<Config>,
-    pub parser: Parser<Language>,
+    pipeline: Pipeline<Config>,
+    parser: Parser<Language>,
     _marker: PhantomData<(Language, Config)>,
 }
 
@@ -28,16 +28,36 @@ where
         }
     }
 
+    /// Get a reference to the pipeline
+    pub fn pipeline(&self) -> &Pipeline<Config> {
+        &self.pipeline
+    }
+
+    /// Get a mutable reference to the pipeline
+    pub fn pipeline_mut(&mut self) -> &mut Pipeline<Config> {
+        &mut self.pipeline
+    }
+
+    /// Get a reference to the parser
+    pub fn parser(&self) -> &Parser<Language> {
+        &self.parser
+    }
+
+    /// Get a mutable reference to the parser
+    pub fn parser_mut(&mut self) -> &mut Parser<Language> {
+        &mut self.parser
+    }
+
     fn run(&mut self, config: &Config, state: &mut ParseState) {
         if state.tree().is_none() {
             self.parser.parse(state);
         }
 
-        for pass in &self.pipeline.passes {
+        for pass in self.pipeline.passes() {
             let root = state.tree().unwrap().root_node();
             let source = state.source();
 
-            let mut edits = pass.run(config, &root, &source);
+            let mut edits = pass.run(config, &root, source);
             println!("Edits for pass: {:?}", edits);
 
             edits.sort_by(|a, b| b.range.0.cmp(&a.range.0));

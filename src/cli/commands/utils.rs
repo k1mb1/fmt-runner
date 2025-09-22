@@ -33,7 +33,7 @@ fn create_default_file<Config: Serialize + Default>(path: &Path) -> Result<(), B
 
 /// Initialize config: if file does not exist, create with default config.
 /// If file exists, validate its contents. Only files with supported extension allowed.
-pub fn init_config<Config>(config_path: &Path) -> Result<(), Box<dyn Error>>
+pub(crate) fn init_config<Config>(config_path: &Path) -> Result<(), Box<dyn Error>>
 where
     Config: Serialize + DeserializeOwned + Default,
 {
@@ -54,7 +54,7 @@ where
 
 /// Load config: if file exists, load; if not, return default.
 /// Only files with supported extension allowed.
-pub fn load_config<Config>(config_path: &Path) -> Result<Config, Box<dyn Error>>
+pub(crate) fn load_config<Config>(config_path: &Path) -> Result<Config, Box<dyn Error>>
 where
     Config: Serialize + DeserializeOwned + Default,
 {
@@ -71,7 +71,7 @@ where
 
 
 /// Recursively collects all files in `root` and subdirectories with extensions supported by `L`.
-pub fn collect_supported_files<Language: LanguageProvider>(root: &Path) -> Vec<PathBuf> {
+pub(crate) fn collect_supported_files<Language: LanguageProvider>(root: &Path) -> Vec<PathBuf> {
     let mut files = Vec::new();
     let supported = Language::supported_extension();
     collect_files_recursive(root, supported, &mut files);
@@ -94,7 +94,7 @@ fn collect_files_recursive(dir: &Path, supported: &SupportedExtension, files: &m
 
 
 /// Collects unique files with supported extensions from a list of paths (files and directories).
-pub fn collect_all_supported_files<Language: LanguageProvider>(paths: &[PathBuf]) -> Vec<PathBuf> {
+pub(crate) fn collect_all_supported_files<Language: LanguageProvider>(paths: &[PathBuf]) -> Vec<PathBuf> {
     let mut files_set = HashSet::new();
     for path in paths {
         for file in collect_supported_files::<Language>(path) {
@@ -106,7 +106,7 @@ pub fn collect_all_supported_files<Language: LanguageProvider>(paths: &[PathBuf]
 
 
 /// Reads the contents of files, skipping those that cannot be read.
-pub fn read_files_to_strings(files: &[PathBuf]) -> Vec<String> {
+pub(crate) fn read_files_to_strings(files: &[PathBuf]) -> Vec<String> {
     files
         .iter()
         .filter_map(|path| fs::read_to_string(path).ok())
