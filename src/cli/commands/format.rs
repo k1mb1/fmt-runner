@@ -25,9 +25,12 @@ pub fn execute<Language, Config>(
         }
     };
 
+    //TODO if files_path is not dirs_path, then we need to handle that case
     let files = collect_all_supported_files::<Language>(&files_path);
     let file_contents = read_files_to_strings(&files);
 
     let mut engine = Engine::<Language, Config>::new(pipeline);
+    println!("start");
     engine.start(&config, &file_contents)
+
 }

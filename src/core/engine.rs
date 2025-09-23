@@ -15,7 +15,6 @@ where
     _marker: PhantomData<(Language, Config)>,
 }
 
-
 impl<Language: LanguageProvider, Config> Engine<Language, Config>
 where
     Config: Serialize + DeserializeOwned,
@@ -70,6 +69,7 @@ where
     }
 
     pub fn start(&mut self, config: &Config, codes: &[String]) {
+        println!("{:?}", codes);
         for (i, code) in codes.iter().enumerate() {
             let mut state = ParseState::new(code.to_string());
             self.run(config, &mut state);
