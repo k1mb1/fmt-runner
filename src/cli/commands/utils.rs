@@ -94,7 +94,9 @@ fn collect_files_recursive(dir: &Path, supported: &SupportedExtension, files: &m
 
 
 /// Collects unique files with supported extensions from a list of paths (files and directories).
-pub(crate) fn collect_all_supported_files<Language: LanguageProvider>(paths: &[PathBuf]) -> Vec<PathBuf> {
+pub(crate) fn collect_all_supported_files<Language: LanguageProvider>(
+    paths: &[PathBuf],
+) -> Vec<PathBuf> {
     let mut files_set = HashSet::new();
     for path in paths {
         for file in collect_supported_files::<Language>(path) {

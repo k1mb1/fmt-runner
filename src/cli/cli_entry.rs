@@ -2,11 +2,11 @@ use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
 
-pub const DEFAULT_CONFIG_FILE: &str = "jvfmt.yml";
-
+pub const DEFAULT_CONFIG_FILE: &str = concat!(env!("CARGO_PKG_NAME"), "jvfmt.yml"); //TODO сделать чтобы bin name был а не библиотеки
 
 #[derive(Parser, Debug)]
 #[command(about = "formatter tool")]
+#[command(name = env!("CARGO_PKG_NAME"))]
 #[command(version = env!("CARGO_PKG_VERSION"))]
 pub struct Cli {
     #[command(subcommand)]
@@ -20,8 +20,8 @@ pub enum Commands {
     Init {
         /// Create configuration file with a given name, or validate an existing one for errors
         #[arg(
-            short = 'f',
-            long = "file",
+            short = 'c',
+            long = "config",
             value_name = "FILENAME",
             default_value = DEFAULT_CONFIG_FILE
         )]

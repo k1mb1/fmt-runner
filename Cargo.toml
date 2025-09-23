@@ -1,7 +1,11 @@
 [package]
 name = "fmt-runner"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+
+[lib]
+name = "fmt_runner"
+path = "src/lib.rs"
 
 [dependencies]
 tree-sitter = "0.25.9"

@@ -14,8 +14,8 @@ pub fn execute<Language, Config>(
     files_path: Vec<PathBuf>,
     pipeline: Pipeline<Config>,
 ) where
-      Config: Serialize + DeserializeOwned + Default,
-      Language: LanguageProvider,
+    Config: Serialize + DeserializeOwned + Default,
+    Language: LanguageProvider,
 {
     let config = match load_config::<Config>(config_path.as_path()) {
         Ok(config) => config,
