@@ -4,20 +4,34 @@ use tree_sitter::Node;
 
 
 /// Базовый трейт для всех пассов форматирования
-pub trait Pass<Config>
-where
-    Config: Serialize + DeserializeOwned,
-{
+pub trait Pass {
+    /// Тип конфигурации для пасса
+    type Config: Serialize + DeserializeOwned;
+
     /// Получает AST и исходный код, возвращает список правок
+    fn run(&self, config: &Self::Config, root: &Node, source: &str) -> Vec<Edit>;
+}
+
+/// Обёртка для динамической диспетчеризации без привязки к ассоциированному типу в объекте
+pub trait ErasedPass<Config> {
     fn run(&self, config: &Config, root: &Node, source: &str) -> Vec<Edit>;
+}
+
+impl<T> ErasedPass<<T as Pass>::Config> for T
+where
+    T: Pass,
+{
+    fn run(&self, config: &<T as Pass>::Config, root: &Node, source: &str) -> Vec<Edit> {
+        <T as Pass>::run(self, config, root, source)
+    }
 }
 
 
 /// Структурированный трейт для пассов, которые работают с конкретными элементами
-pub trait StructuredPass<Config>
-where
-    Config: Serialize + DeserializeOwned,
-{
+pub trait StructuredPass {
+    /// Тип конфигурации
+    type Config: Serialize + DeserializeOwned;
+    /// Тип элемента (узла) форматирования
     type Item;
 
     /// Парсим AST и находим все целевые фрагменты для форматирования
@@ -28,7 +42,7 @@ where
         &self,
         _root: &Node,
         _source: &str,
-        _config: &Config,
+        _config: &Self::Config,
         _items: &mut Vec<Self::Item>,
     ) -> Result<(), String> {
         Ok(())
@@ -39,12 +53,13 @@ where
 }
 
 
-impl<T, Config> Pass<Config> for T
+impl<T> Pass for T
 where
-    T: StructuredPass<Config>,
-    Config: Serialize + DeserializeOwned,
+    T: StructuredPass,
 {
-    fn run(&self, config: &Config, root: &Node, source: &str) -> Vec<Edit> {
+    type Config = <T as StructuredPass>::Config;
+
+    fn run(&self, config: &Self::Config, root: &Node, source: &str) -> Vec<Edit> {
         let mut edits = Vec::new();
 
         for mut target in self.find_targets(root, source) {

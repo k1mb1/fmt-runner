@@ -1,25 +1,15 @@
-use crate::parser::LanguageProvider;
-use crate::parser::ParseState;
-use crate::parser::Parser;
+use crate::parser::{LanguageProvider, ParseState, Parser};
 use crate::pipeline::Pipeline;
-use serde::{de::DeserializeOwned, Serialize};
 use std::marker::PhantomData;
 
-
-pub struct Engine<Language: LanguageProvider, Config>
-where
-    Config: Serialize + DeserializeOwned,
-{
+pub struct Engine<Language: LanguageProvider, Config> {
     pipeline: Pipeline<Config>,
     parser: Parser<Language>,
     _marker: PhantomData<(Language, Config)>,
 }
 
-impl<Language: LanguageProvider, Config> Engine<Language, Config>
-where
-    Config: Serialize + DeserializeOwned,
-{
-    pub fn new(pipeline: Pipeline<Config>) -> Self {
+impl<Language: LanguageProvider, C> Engine<Language, C> {
+    pub fn new(pipeline: Pipeline<C>) -> Self {
         Self {
             pipeline,
             parser: Parser::new(),
@@ -28,12 +18,12 @@ where
     }
 
     /// Get a reference to the pipeline
-    pub fn pipeline(&self) -> &Pipeline<Config> {
+    pub fn pipeline(&self) -> &Pipeline<C> {
         &self.pipeline
     }
 
     /// Get a mutable reference to the pipeline
-    pub fn pipeline_mut(&mut self) -> &mut Pipeline<Config> {
+    pub fn pipeline_mut(&mut self) -> &mut Pipeline<C> {
         &mut self.pipeline
     }
 
@@ -47,7 +37,7 @@ where
         &mut self.parser
     }
 
-    fn run(&mut self, config: &Config, state: &mut ParseState) {
+    fn run(&mut self, config: &C, state: &mut ParseState) {
         if state.tree().is_none() {
             self.parser.parse(state);
         }
@@ -68,7 +58,7 @@ where
         }
     }
 
-    pub fn start(&mut self, config: &Config, codes: &[String]) {
+    pub fn start(&mut self, config: &C, codes: &[String]) {
         for (i, code) in codes.iter().enumerate() {
             let mut state = ParseState::new(code.to_string());
             self.run(config, &mut state);
