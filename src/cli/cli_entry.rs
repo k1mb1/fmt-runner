@@ -1,8 +1,7 @@
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
-
-pub const DEFAULT_CONFIG_FILE: &str = concat!(env!("CARGO_PKG_NAME"), "jvfmt.yml"); //TODO сделать чтобы bin name был а не библиотеки
+pub const DEFAULT_CONFIG_FILE: &str = concat!(env!("CARGO_PKG_NAME"), ".yml"); //TODO сделать чтобы bin name был а не библиотеки
 
 #[derive(Parser, Debug)]
 #[command(about = "formatter tool")]
@@ -12,7 +11,6 @@ pub struct Cli {
     #[command(subcommand)]
     pub commands: Commands,
 }
-
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {

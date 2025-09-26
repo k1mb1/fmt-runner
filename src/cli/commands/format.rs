@@ -8,7 +8,6 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::path::PathBuf;
 
-
 pub fn execute<Language, Config>(
     config_path: PathBuf,
     files_path: Vec<PathBuf>,
@@ -32,5 +31,4 @@ pub fn execute<Language, Config>(
     let mut engine = Engine::<Language, Config>::new(pipeline);
     println!("start");
     engine.start(&config, &file_contents)
-
 }

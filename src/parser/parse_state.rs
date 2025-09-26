@@ -1,6 +1,5 @@
 use tree_sitter::Tree;
 
-
 /// State for parsing, containing source text and optional parse tree.
 pub struct ParseState {
     pub(crate) source: String,

@@ -2,7 +2,6 @@ use crate::pipeline::edit::{Edit, EditTarget};
 use serde::{de::DeserializeOwned, Serialize};
 use tree_sitter::Node;
 
-
 /// Базовый трейт для всех пассов форматирования
 pub trait Pass {
     /// Тип конфигурации для пасса
@@ -26,7 +25,6 @@ where
     }
 }
 
-
 /// Структурированный трейт для пассов, которые работают с конкретными элементами
 pub trait StructuredPass {
     /// Тип конфигурации
@@ -49,9 +47,8 @@ pub trait StructuredPass {
     }
 
     /// Собираем готовый код из элементов
-    fn build(&self, items: &[Self::Item]) -> String;
+    fn build(&self, _config: &Self::Config, items: &[Self::Item]) -> String;
 }
-
 
 impl<T> Pass for T
 where
@@ -72,7 +69,7 @@ where
                 continue;
             }
 
-            let content = self.build(&target.items);
+            let content = self.build(config, &target.items);
             edits.push(Edit {
                 range: target.range,
                 content,

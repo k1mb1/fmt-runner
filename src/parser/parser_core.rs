@@ -2,7 +2,6 @@ use crate::parser::language_provider::LanguageProvider;
 use crate::parser::parse_state::ParseState;
 use tree_sitter::{InputEdit, Parser as TsParser};
 
-
 /// Generic parser that owns a tree-sitter parser.
 /// The source and tree are managed separately in ParseState.
 pub struct Parser<Language: LanguageProvider> {

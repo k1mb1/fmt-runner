@@ -1,5 +1,5 @@
-use crate::pipeline::Pass;
 use crate::pipeline::pass::ErasedPass;
+use crate::pipeline::Pass;
 
 pub struct Pipeline<Config> {
     passes: Vec<Box<dyn ErasedPass<Config>>>,
@@ -33,7 +33,6 @@ impl<Config> Pipeline<Config> {
         self.passes.is_empty()
     }
 }
-
 
 impl<Config> Default for Pipeline<Config> {
     fn default() -> Self {

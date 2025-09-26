@@ -1,15 +1,12 @@
 use std::path::Path;
 
-
 pub static CONFIG_EXTENSIONS: SupportedExtension = SupportedExtension::new(&["yml", "yaml"]);
-
 
 /// A wrapper type for a collection of supported file extensions.
 #[derive(Debug)]
 pub struct SupportedExtension {
     extensions: &'static [&'static str],
 }
-
 
 impl SupportedExtension {
     /// Creates a new instance with the given extensions (should be in lower case, without dots).
@@ -18,7 +15,7 @@ impl SupportedExtension {
     }
 
     /// Returns true if the given extension (case-insensitive, without dot) is supported.
-    /// 
+    ///
     /// This is a private helper method used by the public `matches` method.
     fn contains(&self, extension: &str) -> bool {
         let ext = extension.to_ascii_lowercase();
@@ -49,14 +46,11 @@ impl SupportedExtension {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
-
     const SUPPORTED: SupportedExtension = SupportedExtension::new(&["rs", "toml", "md"]);
-
 
     #[test]
     fn test_contains() {
@@ -65,7 +59,6 @@ mod tests {
         assert!(SUPPORTED.contains("Md"));
         assert!(!SUPPORTED.contains("exe"));
     }
-
 
     #[test]
     fn test_matches() {

@@ -5,7 +5,6 @@ use crate::pipeline::Pipeline;
 use clap::Parser;
 use serde::{de::DeserializeOwned, Serialize};
 
-
 pub fn handle_cli<Language, Config>(pipeline: Pipeline<Config>)
 where
     Config: Serialize + DeserializeOwned + Default,
