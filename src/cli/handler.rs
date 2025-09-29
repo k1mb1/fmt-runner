@@ -1,16 +1,10 @@
 use crate::cli::cli_entry::{build_cli, CliCommand};
 use crate::cli::commands::{format, init};
-use crate::cli::error::{CliError, CliResult};
+use crate::cli::error::{exit_with_error, CliError, CliResult};
 use crate::parser::LanguageProvider;
 use crate::pipeline::Pipeline;
 use serde::{de::DeserializeOwned, Serialize};
-use std::{env, process};
-
-/// Exit the program with a CLI error
-fn exit_with_error(error: CliError) -> ! {
-    eprintln!("Error: {}", error);
-    process::exit(1);
-}
+use std::env;
 
 /// Parse command string to CliCommand enum
 fn parse_command(cmd_str: &str) -> Option<CliCommand> {
@@ -42,8 +36,7 @@ where
     Language: LanguageProvider,
 {
     if let Err(e) = try_handle_cli::<Language, Config>(pipeline) {
-        eprintln!("Error: {}", e);
-        process::exit(1);
+        exit_with_error(e);
     }
 }
 

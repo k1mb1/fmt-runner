@@ -107,22 +107,3 @@ pub(crate) fn read_files_to_strings(files: &[PathBuf]) -> CliResult<Vec<String>>
     }
     Ok(contents)
 }
-
-/// Reads the contents of files, skipping those that cannot be read.
-/// Returns the successfully read contents and a count of skipped files.
-pub(crate) fn read_files_to_strings_best_effort(files: &[PathBuf]) -> (Vec<String>, usize) {
-    let mut contents = Vec::new();
-    let mut skipped = 0;
-
-    for file_path in files {
-        match fs::read_to_string(file_path) {
-            Ok(content) => contents.push(content),
-            Err(_) => {
-                skipped += 1;
-                eprintln!("Warning: Could not read file: {}", file_path.display());
-            }
-        }
-    }
-
-    (contents, skipped)
-}
