@@ -1,43 +1,59 @@
-use clap::{Parser, Subcommand};
-use std::path::PathBuf;
+use clap::{Arg, Command};
 
-pub const DEFAULT_CONFIG_FILE: &str = concat!(env!("CARGO_PKG_NAME"), ".yml"); //TODO сделать чтобы bin name был а не библиотеки
-
-#[derive(Parser, Debug)]
-#[command(about = "formatter tool")]
-#[command(name = env!("CARGO_PKG_NAME"))]
-#[command(version = env!("CARGO_PKG_VERSION"))]
-pub struct Cli {
-    #[command(subcommand)]
-    pub commands: Commands,
+/// CLI commands
+#[derive(Debug, Clone, Copy)]
+pub enum CliCommand {
+    Init,
+    Format,
 }
 
-#[derive(Subcommand, Debug)]
-pub enum Commands {
-    /// Create a new configuration file
-    Init {
-        /// Create configuration file with a given name, or validate an existing one for errors
-        #[arg(
-            short = 'c',
-            long = "config",
-            value_name = "FILENAME",
-            default_value = DEFAULT_CONFIG_FILE
-        )]
-        config_path: PathBuf,
-    },
+impl CliCommand {
+    const INIT: &'static str = "init";
+    const FORMAT: &'static str = "format";
 
-    /// Форматирует указанные файлы
-    Format {
-        #[arg(
-            short = 'c',
-            long = "config",
-            value_name = "FILENAME",
-            default_value = DEFAULT_CONFIG_FILE
-        )]
-        config_path: PathBuf,
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            CliCommand::Init => Self::INIT,
+            CliCommand::Format => Self::FORMAT,
+        }
+    }
+}
 
-        #[arg(value_name = "FILES", default_value = ".")]
-        files_path: Vec<PathBuf>,
-        //TODO сделать вывод просто check или в файл
-    },
+/// Get config filename by binary name
+fn default_config_name(bin_name: &str) -> String {
+    format!("{bin_name}.yml")
+}
+
+fn config_arg(default: &'static str) -> Arg {
+    Arg::new("config_path")
+        .short('c')
+        .long("config")
+        .value_name("FILENAME")
+        .default_value(default)
+}
+
+/// Build CLI with dynamic binary and config names
+pub fn build_cli(bin_name: &str) -> Command {
+    let bin_name_leaked: &'static str = Box::leak(bin_name.to_string().into_boxed_str());
+    let config_leaked: &'static str = Box::leak(default_config_name(bin_name).into_boxed_str());
+
+    Command::new(bin_name_leaked)
+        .about("Formatter tool")
+        .version(env!("CARGO_PKG_VERSION"))
+        .subcommand(
+            Command::new(CliCommand::Init.as_str())
+                .about("Create a new configuration file")
+                .arg(config_arg(config_leaked)),
+        )
+        .subcommand(
+            Command::new(CliCommand::Format.as_str())
+                .about("Format specified files")
+                .arg(config_arg(config_leaked))
+                .arg(
+                    Arg::new("files_path")
+                        .value_name("FILES")
+                        .default_value(".")
+                        .num_args(1..),
+                ),
+        )
 }
