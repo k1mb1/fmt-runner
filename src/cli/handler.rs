@@ -1,24 +1,14 @@
 use crate::cli::cli_entry::{build_cli, CliCommand};
 use crate::cli::commands::{format, init};
+use crate::cli::error::{CliError, CliResult};
 use crate::parser::LanguageProvider;
 use crate::pipeline::Pipeline;
 use serde::{de::DeserializeOwned, Serialize};
 use std::{env, process};
 
-/// Result type for CLI operations
-type CliResult<T> = Result<T, Box<dyn std::error::Error>>;
-
-/// Error messages constants
-mod error_messages {
-    pub const CONFIG_PATH_MISSING: &str = "Config path argument is missing";
-    pub const FILES_PATH_MISSING: &str = "Files path argument is missing";
-    pub const NO_VALID_SUBCOMMAND: &str =
-        "No valid subcommand provided. Use --help for usage information.";
-}
-
-/// Exit the program with an error message
-fn exit_with_error(message: &str) -> ! {
-    eprintln!("Error: {}", message);
+/// Exit the program with a CLI error
+fn exit_with_error(error: CliError) -> ! {
+    eprintln!("Error: {}", error);
     process::exit(1);
 }
 
@@ -63,7 +53,7 @@ where
     Config: Serialize + DeserializeOwned + Default,
     Language: LanguageProvider,
 {
-    let bin_name = get_binary_name();
+    let bin_name = get_binary_name().unwrap_or_else(|_| "fmt-runner".to_string());
     let matches = build_cli(&bin_name).get_matches();
 
     match matches.subcommand() {
@@ -75,11 +65,13 @@ where
                 handle_format_command::<Language, Config>(sub_matches, pipeline)?;
             }
             None => {
-                exit_with_error(&format!("Unknown command '{}'", cmd_str));
+                exit_with_error(CliError::UnknownCommand {
+                    command: cmd_str.to_string(),
+                });
             }
         },
         None => {
-            exit_with_error(error_messages::NO_VALID_SUBCOMMAND);
+            exit_with_error(CliError::NoValidSubcommand);
         }
     }
 
@@ -87,7 +79,7 @@ where
 }
 
 /// Get the binary name from command line arguments
-fn get_binary_name() -> String {
+fn get_binary_name() -> CliResult<String> {
     env::args()
         .next()
         .and_then(|path| {
@@ -96,7 +88,7 @@ fn get_binary_name() -> String {
                 .and_then(|name| name.to_str())
                 .map(|name| name.to_string())
         })
-        .unwrap_or_else(|| "fmt-runner".to_string())
+        .ok_or(CliError::BinaryNameError)
 }
 
 /// Handle the 'init' subcommand
@@ -106,9 +98,9 @@ where
 {
     let config_path = sub_matches
         .get_one::<String>("config_path")
-        .ok_or(error_messages::CONFIG_PATH_MISSING)?;
+        .ok_or(CliError::ConfigPathMissing)?;
 
-    init::<Config>(config_path.into());
+    init::<Config>(config_path.into())?;
     Ok(())
 }
 
@@ -123,11 +115,11 @@ where
 {
     let config_path = sub_matches
         .get_one::<String>("config_path")
-        .ok_or(error_messages::CONFIG_PATH_MISSING)?;
+        .ok_or(CliError::ConfigPathMissing)?;
 
     let files_path: Vec<String> = sub_matches
         .get_many::<String>("files_path")
-        .ok_or(error_messages::FILES_PATH_MISSING)?
+        .ok_or(CliError::FilesPathMissing)?
         .cloned()
         .collect();
 
@@ -135,7 +127,7 @@ where
         config_path.into(),
         files_path.into_iter().map(Into::into).collect(),
         pipeline,
-    );
+    )?;
 
     Ok(())
 }
