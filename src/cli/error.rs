@@ -18,12 +18,6 @@ pub enum CliError {
     #[error("Failed to get binary name from command line arguments")]
     BinaryNameError,
 
-    #[error("Configuration error: {message}")]
-    ConfigError { message: String },
-
-    #[error("File processing error: {message}")]
-    FileProcessingError { message: String },
-
     #[error("Config file has unsupported extension")]
     UnsupportedConfigExtension,
 
