@@ -20,30 +20,32 @@ fn from_file<Config: DeserializeOwned>(config_path: &Path) -> CliResult<Config> 
 }
 
 /// Create a default Config file at the given path.
-fn create_default_file<Config: Serialize + Default>(path: &Path) -> CliResult<()> {
+pub(crate) fn create_default_file<Config: Serialize + Default>(path: &Path) -> CliResult<()> {
     let default_config = Config::default();
     let yaml = serde_yaml::to_string(&default_config)?;
     fs::write(path, yaml)?;
     Ok(())
 }
 
-/// Initialize config: if file does not exist, create with default config.
-/// If file exists, validate its contents. Only files with supported extension allowed.
-pub(crate) fn init_config<Config>(config_path: &Path) -> CliResult<()>
-where
-    Config: Serialize + DeserializeOwned + Default,
-{
-    if !CONFIG_EXTENSIONS.matches(config_path) {
+pub(crate) fn check_extension(path: &Path) -> CliResult<()> {
+    if !CONFIG_EXTENSIONS.matches(path) {
         return Err(CliError::UnsupportedConfigExtension);
     }
+    Ok(())
+}
 
-    if config_path.exists() {
-        println!("Config file already exists, validating...");
-        from_file::<Config>(config_path)?;
+pub(crate) fn exists_config(path: &Path) -> CliResult<bool> {
+    if path.exists() {
+        check_extension(path)?;
+        Ok(true)
     } else {
-        create_default_file::<Config>(config_path)?;
-        println!("Default config file created at {:?}", config_path);
+        Ok(false)
     }
+}
+
+pub(crate) fn validate_config<Config: DeserializeOwned>(path: &Path) -> CliResult<()> {
+    //TODO validate content
+    from_file::<Config>(path)?;
     Ok(())
 }
 
