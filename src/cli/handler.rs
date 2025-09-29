@@ -45,7 +45,9 @@ where
     Language: LanguageProvider,
 {
     // Initialize logger with default configuration
-    env_logger::init();
+    env_logger::Builder::from_default_env()
+        .filter_level(log::LevelFilter::Warn)
+        .init();
 
     if let Err(e) = try_handle_cli::<Language, Config>(pipeline) {
         exit_with_error(e);
