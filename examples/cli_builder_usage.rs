@@ -1,6 +1,5 @@
 use fmt_runner::{
-    cli_builder, AdvancedCliBuilder, CliBuilder, Edit, LanguageProvider, Pass, Pipeline,
-    SupportedExtension,
+    cli_builder, CliBuilder, Edit, LanguageProvider, Pass, Pipeline, SupportedExtension,
 };
 use serde::{Deserialize, Serialize};
 use tree_sitter::Node;
@@ -77,16 +76,7 @@ fn main() {
         .add_pass(LineLengthPass)
         .try_run();
 
-    // Example 3: Advanced builder with passes
-    cli_builder::<MyLanguage, MyConfig>()
-        .add_pass(IndentationPass)
-        .add_pass(LineLengthPass)
-        .advanced()
-        .with_binary_name("my-formatter")
-        .with_config_name("custom-config.yml")
-        .run();
-
-    // Example 4: Backward compatibility - using with_pipeline
+    // Example 3: Using with_pipeline
     let mut pipeline = Pipeline::<MyConfig>::new();
     pipeline.add_pass(IndentationPass);
     pipeline.add_pass(LineLengthPass);
@@ -95,7 +85,7 @@ fn main() {
         .with_pipeline(pipeline)
         .run();
 
-    // Example 5: Creating a reusable builder factory
+    // Example 4: Creating a reusable builder factory
     let create_cli = || {
         cli_builder::<MyLanguage, MyConfig>()
             .add_pass(IndentationPass)
