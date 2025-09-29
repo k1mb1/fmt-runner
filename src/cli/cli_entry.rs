@@ -8,11 +8,13 @@ pub enum FormatMode {
 }
 
 impl FormatMode {
-    pub fn from_str(s: &str) -> Option<Self> {
-        match s {
-            "check" => Some(Self::Check),
-            "write" => Some(Self::Write),
-            _ => None,
+    const CHECK: &'static str = "check";
+    const WRITE: &'static str = "write";
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            FormatMode::Check => Self::CHECK,
+            FormatMode::Write => Self::WRITE,
         }
     }
 }
@@ -77,9 +79,13 @@ pub fn build_cli(bin_name: &str) -> Command {
                         .short('m')
                         .long("mode")
                         .value_name("MODE")
-                        .default_value("check")
-                        .value_parser(["check", "write"])
-                        .help("Format mode: 'check' to only verify formatting, 'write' to apply changes"),
+                        .default_value(FormatMode::Check.as_str())
+                        .value_parser([FormatMode::Check.as_str(), FormatMode::Write.as_str()])
+                        .help(format!(
+                            "Format mode: '{}' to only verify formatting, '{}' to apply changes",
+                            FormatMode::Check.as_str(),
+                            FormatMode::Write.as_str()
+                        )),
                 ),
         )
 }

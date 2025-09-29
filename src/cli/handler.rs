@@ -15,6 +15,15 @@ fn parse_command(cmd_str: &str) -> Option<CliCommand> {
     }
 }
 
+/// Parse mode string to FormatMode enum
+fn parse_mode(mode_str: &str) -> Option<FormatMode> {
+    match mode_str {
+        mode if mode == FormatMode::Check.as_str() => Some(FormatMode::Check),
+        mode if mode == FormatMode::Write.as_str() => Some(FormatMode::Write),
+        _ => None,
+    }
+}
+
 /// Handle command line interface for the formatter tool
 ///
 /// This function parses command line arguments and executes the appropriate command
@@ -124,7 +133,7 @@ where
         .map(|s| s.as_str())
         .unwrap_or("check");
 
-    let mode = FormatMode::from_str(mode_str).ok_or_else(|| CliError::InvalidArgument {
+    let mode = parse_mode(mode_str).ok_or_else(|| CliError::InvalidArgument {
         arg: "mode".to_string(),
         value: mode_str.to_string(),
     })?;
