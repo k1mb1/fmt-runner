@@ -5,5 +5,3 @@ mod error;
 mod handler;
 
 pub use builder::{cli_builder, CliBuilder};
-pub use error::{CliError, CliResult};
-pub use handler::handle_cli;
