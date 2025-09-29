@@ -39,7 +39,7 @@ pub fn build_cli(bin_name: &str) -> Command {
 
     Command::new(bin_name_leaked)
         .about("Formatter tool")
-        .version(env!("CARGO_PKG_VERSION"))
+        .version(env!("CARGO_PKG_VERSION")) //TODO use clap's built-in version feature or not?
         .subcommand(
             Command::new(CliCommand::Init.as_str())
                 .about("Create a new configuration file")

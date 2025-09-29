@@ -49,20 +49,20 @@ pub(crate) fn validate_config<Config: DeserializeOwned>(path: &Path) -> CliResul
     Ok(())
 }
 
-/// Load config: if file exists, load; if not, return default.
-/// Only files with supported extension allowed.
 pub(crate) fn load_config<Config>(config_path: &Path) -> CliResult<Config>
 where
     Config: Serialize + DeserializeOwned + Default,
 {
-    if config_path.exists() {
-        if !CONFIG_EXTENSIONS.matches(config_path) {
-            return Err(CliError::UnsupportedConfigExtension);
-        }
-        from_file::<Config>(config_path)
+    print!("Loading config from {}...\n", config_path.display());
+    let config = if exists_config(&config_path)? {
+        validate_config::<Config>(&config_path)?;
+        from_file(config_path)?
     } else {
-        Ok(Config::default())
-    }
+        check_extension(&config_path)?;
+        print!("Config file not found, creating default at {}...\n", config_path.display());
+        Config::default()
+    };
+    Ok(config)
 }
 
 /// Recursively collects all files in `root` and subdirectories with extensions supported by `L`.

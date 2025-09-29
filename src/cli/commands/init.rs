@@ -1,7 +1,7 @@
 use crate::cli::commands::utils::{
     check_extension, create_default_file, exists_config, validate_config,
 };
-use crate::cli::error::{CliError, CliResult};
+use crate::cli::error::CliResult;
 use serde::{de::DeserializeOwned, Serialize};
 use std::path::PathBuf;
 
