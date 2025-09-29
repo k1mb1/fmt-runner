@@ -29,21 +29,6 @@ impl SupportedExtension {
             None => false,
         }
     }
-
-    /// Get the list of supported extensions
-    pub fn extensions(&self) -> &[&str] {
-        self.extensions
-    }
-
-    /// Get the number of supported extensions
-    pub fn len(&self) -> usize {
-        self.extensions.len()
-    }
-
-    /// Check if this set is empty
-    pub fn is_empty(&self) -> bool {
-        self.extensions.is_empty()
-    }
 }
 
 #[cfg(test)]

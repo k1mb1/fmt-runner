@@ -1,11 +1,12 @@
+use crate::cli::cli_entry::FormatMode;
 use crate::cli::commands::utils::{
     collect_all_supported_files, load_config, read_files_to_strings,
 };
 use crate::cli::error::CliResult;
-use crate::cli::cli_entry::FormatMode;
 use crate::core::Engine;
 use crate::parser::LanguageProvider;
 use crate::pipeline::Pipeline;
+use log::{info, warn};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::path::PathBuf;
@@ -26,32 +27,32 @@ where
     let file_contents = read_files_to_strings(&files)?;
 
     let mut engine = Engine::<Language, Config>::new(pipeline);
-    
+
     match mode {
         FormatMode::Check => {
-            println!("Running in check mode...");
+            info!("Running in check mode...");
             let changed_files = engine.check(&config, &file_contents, &files);
-            
+
             if changed_files.is_empty() {
-                println!("✓ All files are formatted correctly!");
+                info!("✓ All files are formatted correctly!");
             } else {
-                println!("✗ The following files need formatting:");
+                warn!("✗ The following files need formatting:");
                 for file in &changed_files {
-                    println!("  - {}", file.display());
+                    warn!("  - {}", file.display());
                 }
-                println!("\nRun with --mode write to apply formatting.");
+                info!("\nRun with --mode write to apply formatting.");
             }
         }
         FormatMode::Write => {
-            println!("Running in write mode...");
+            info!("Running in write mode...");
             let changed_files = engine.format_and_write(&config, &file_contents, &files)?;
-            
+
             if changed_files.is_empty() {
-                println!("✓ No files needed formatting!");
+                info!("✓ No files needed formatting!");
             } else {
-                println!("✓ Formatted {} file(s):", changed_files.len());
+                info!("✓ Formatted {} file(s):", changed_files.len());
                 for file in &changed_files {
-                    println!("  - {}", file.display());
+                    info!("  - {}", file.display());
                 }
             }
         }

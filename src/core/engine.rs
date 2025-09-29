@@ -1,5 +1,6 @@
 use crate::parser::{LanguageProvider, ParseState, Parser};
 use crate::pipeline::Pipeline;
+use log::debug;
 use std::marker::PhantomData;
 use std::path::PathBuf;
 
@@ -17,27 +18,6 @@ impl<Language: LanguageProvider, C> Engine<Language, C> {
             _marker: PhantomData,
         }
     }
-
-    /// Get a reference to the pipeline
-    pub fn pipeline(&self) -> &Pipeline<C> {
-        &self.pipeline
-    }
-
-    /// Get a mutable reference to the pipeline
-    pub fn pipeline_mut(&mut self) -> &mut Pipeline<C> {
-        &mut self.pipeline
-    }
-
-    /// Get a reference to the parser
-    pub fn parser(&self) -> &Parser<Language> {
-        &self.parser
-    }
-
-    /// Get a mutable reference to the parser
-    pub fn parser_mut(&mut self) -> &mut Parser<Language> {
-        &mut self.parser
-    }
-
     fn run(&mut self, config: &C, state: &mut ParseState) {
         if state.tree().is_none() {
             self.parser.parse(state);
@@ -48,7 +28,7 @@ impl<Language: LanguageProvider, C> Engine<Language, C> {
             let source = state.source();
 
             let mut edits = pass.run(config, &root, source);
-            println!("Edits for pass: {:?}", edits);
+            debug!("Edits for pass: {:?}", edits);
 
             edits.sort_by(|a, b| b.range.0.cmp(&a.range.0));
 
@@ -56,17 +36,6 @@ impl<Language: LanguageProvider, C> Engine<Language, C> {
                 self.parser
                     .apply_edit(state, edit.range.0, edit.range.1, &edit.content);
             }
-        }
-    }
-
-    pub fn start(&mut self, config: &C, codes: &[String]) {
-        for (i, code) in codes.iter().enumerate() {
-            let mut state = ParseState::new(code.to_string());
-            self.run(config, &mut state);
-
-            println!("Final source for code {}:", i + 1);
-            println!("{}", state.source());
-            println!("---");
         }
     }
 
@@ -78,10 +47,8 @@ impl<Language: LanguageProvider, C> Engine<Language, C> {
             let mut state = ParseState::new(code.to_string());
             self.run(config, &mut state);
 
-            if state.source() != code {
-                if i < files.len() {
-                    changed_files.push(files[i].clone());
-                }
+            if state.source() != code && i < files.len() {
+                changed_files.push(files[i].clone());
             }
         }
 
@@ -102,12 +69,10 @@ impl<Language: LanguageProvider, C> Engine<Language, C> {
             self.run(config, &mut state);
 
             let formatted_code = state.source();
-            if formatted_code != code {
-                if i < files.len() {
-                    let file_path = &files[i];
-                    std::fs::write(file_path, formatted_code)?;
-                    changed_files.push(file_path.clone());
-                }
+            if formatted_code != code && i < files.len() {
+                let file_path = &files[i];
+                std::fs::write(file_path, formatted_code)?;
+                changed_files.push(file_path.clone());
             }
         }
 

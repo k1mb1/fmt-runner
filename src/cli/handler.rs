@@ -35,6 +35,9 @@ where
     Config: Serialize + DeserializeOwned + Default,
     Language: LanguageProvider,
 {
+    // Initialize logger with default configuration
+    env_logger::init();
+
     if let Err(e) = try_handle_cli::<Language, Config>(pipeline) {
         exit_with_error(e);
     }
@@ -121,11 +124,10 @@ where
         .map(|s| s.as_str())
         .unwrap_or("check");
 
-    let mode = FormatMode::from_str(mode_str)
-        .ok_or_else(|| CliError::InvalidArgument {
-            arg: "mode".to_string(),
-            value: mode_str.to_string(),
-        })?;
+    let mode = FormatMode::from_str(mode_str).ok_or_else(|| CliError::InvalidArgument {
+        arg: "mode".to_string(),
+        value: mode_str.to_string(),
+    })?;
 
     format::<Language, Config>(
         config_path.into(),

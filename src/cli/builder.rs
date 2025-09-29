@@ -48,11 +48,6 @@ where
     pub fn run(self) {
         handle_cli::<Language, Config>(self.pipeline);
     }
-
-    /// Run the CLI
-    pub fn try_run(self) {
-        handle_cli::<Language, Config>(self.pipeline);
-    }
 }
 
 impl<Language, Config> Default for CliBuilder<Language, Config>

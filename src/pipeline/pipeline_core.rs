@@ -22,16 +22,6 @@ impl<Config> Pipeline<Config> {
     pub fn passes(&self) -> &[Box<dyn ErasedPass<Config>>] {
         &self.passes
     }
-
-    /// Get the number of passes
-    pub fn len(&self) -> usize {
-        self.passes.len()
-    }
-
-    /// Check if the pipeline is empty
-    pub fn is_empty(&self) -> bool {
-        self.passes.is_empty()
-    }
 }
 
 impl<Config> Default for Pipeline<Config> {

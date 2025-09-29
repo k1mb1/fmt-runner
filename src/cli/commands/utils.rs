@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use crate::cli::error::{CliError, CliResult};
 use crate::parser::LanguageProvider;
 use crate::supported_extension::{SupportedExtension, CONFIG_EXTENSIONS};
+use log::{debug, info};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fs;
@@ -66,13 +67,13 @@ pub(crate) fn load_config<Config>(config_path: &Path) -> CliResult<Config>
 where
     Config: Serialize + DeserializeOwned + Default,
 {
-    println!("Loading config from {}...", config_path.display());
+    info!("Loading config from {}...", config_path.display());
     let config = if exists_config(config_path)? {
         validate_config::<Config>(config_path)?;
         from_file(config_path)?
     } else {
         check_extension(config_path)?;
-        println!(
+        debug!(
             "Config file not found, creating default at {}...",
             config_path.display()
         );

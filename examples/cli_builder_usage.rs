@@ -1,6 +1,5 @@
-use fmt_runner::{
-    cli_builder, CliBuilder, Edit, LanguageProvider, Pass, Pipeline, SupportedExtension,
-};
+use fmt_runner::{cli_builder, Edit, LanguageProvider, Pass, Pipeline, SupportedExtension};
+use log::info;
 use serde::{Deserialize, Serialize};
 use tree_sitter::Node;
 
@@ -19,7 +18,7 @@ impl Pass for IndentationPass {
 
     fn run(&self, config: &Self::Config, _root: &Node, _source: &str) -> Vec<Edit> {
         // Example implementation - in real code you'd analyze the AST
-        println!(
+        info!(
             "Running indentation pass with indent_size: {}",
             config.indent_size
         );
@@ -35,7 +34,7 @@ impl Pass for LineLengthPass {
 
     fn run(&self, config: &Self::Config, _root: &Node, _source: &str) -> Vec<Edit> {
         // Example implementation - in real code you'd analyze the AST
-        println!(
+        info!(
             "Running line length pass with max_line_length: {}",
             config.max_line_length
         );
@@ -62,21 +61,16 @@ impl LanguageProvider for MyLanguage {
 }
 
 fn main() {
+    // Initialize logger
+    env_logger::init();
+
     // Example 1: Using add_pass method chaining
     cli_builder::<MyLanguage, MyConfig>()
         .add_pass(IndentationPass)
         .add_pass(LineLengthPass)
         .run();
 
-    // Example 2: Building step by step with passes
-    let builder = CliBuilder::<MyLanguage, MyConfig>::new();
-
-    builder
-        .add_pass(IndentationPass)
-        .add_pass(LineLengthPass)
-        .try_run();
-
-    // Example 3: Using with_pipeline
+    // Example 2: Using with_pipeline
     let mut pipeline = Pipeline::<MyConfig>::new();
     pipeline.add_pass(IndentationPass);
     pipeline.add_pass(LineLengthPass);
@@ -85,7 +79,7 @@ fn main() {
         .with_pipeline(pipeline)
         .run();
 
-    // Example 4: Creating a reusable builder factory
+    // Example 3: Creating a reusable builder factory
     let create_cli = || {
         cli_builder::<MyLanguage, MyConfig>()
             .add_pass(IndentationPass)
@@ -98,6 +92,7 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use fmt_runner::CliBuilder;
 
     #[test]
     fn test_builder_creation() {

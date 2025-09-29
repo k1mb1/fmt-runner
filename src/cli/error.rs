@@ -1,3 +1,4 @@
+use log::error;
 use thiserror::Error;
 
 /// CLI-specific errors
@@ -49,6 +50,6 @@ pub type CliResult<T> = Result<T, CliError>;
 /// with status code 1. It's intended for fatal errors that should terminate
 /// the application immediately.
 pub fn exit_with_error(error: CliError) -> ! {
-    eprintln!("Error: {}", error);
+    error!("Error: {}", error);
     std::process::exit(1);
 }
