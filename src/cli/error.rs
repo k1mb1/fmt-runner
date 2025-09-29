@@ -49,7 +49,7 @@ pub type CliResult<T> = Result<T, CliError>;
 /// This function prints the error message to stderr and exits the program
 /// with status code 1. It's intended for fatal errors that should terminate
 /// the application immediately.
-pub fn exit_with_error(error: CliError) -> ! {
-    error!("Error: {}", error);
+pub fn exit_with_error(error: &CliError) -> ! {
+    error!("Error: {error}");
     std::process::exit(1);
 }

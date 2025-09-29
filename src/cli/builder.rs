@@ -22,6 +22,7 @@ where
     Language: LanguageProvider,
 {
     /// Create new CLI builder
+    #[must_use]
     pub fn new() -> Self {
         Self {
             pipeline: Pipeline::new(),
@@ -30,6 +31,7 @@ where
     }
 
     /// Add pass to the pipeline
+    #[must_use]
     pub fn add_pass<P>(mut self, pass: P) -> Self
     where
         P: Pass<Config = Config> + 'static,
@@ -39,6 +41,7 @@ where
     }
 
     /// Set the pipeline to use
+    #[must_use]
     pub fn with_pipeline(mut self, pipeline: Pipeline<Config>) -> Self {
         self.pipeline = pipeline;
         self
@@ -61,6 +64,7 @@ where
 }
 
 /// Create new CLI builder
+#[must_use]
 pub fn cli_builder<Language, Config>() -> CliBuilder<Language, Config>
 where
     Config: Serialize + DeserializeOwned + Default,

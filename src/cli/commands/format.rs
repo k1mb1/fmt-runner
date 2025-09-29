@@ -9,11 +9,11 @@ use crate::pipeline::Pipeline;
 use log::{info, warn};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub fn execute<Language, Config>(
-    config_path: PathBuf,
-    files_path: Vec<PathBuf>,
+    config_path: &Path,
+    files_path: &[PathBuf],
     pipeline: Pipeline<Config>,
     mode: FormatMode,
 ) -> CliResult<()>
@@ -21,9 +21,9 @@ where
     Config: Serialize + DeserializeOwned + Default,
     Language: LanguageProvider,
 {
-    let config = load_config::<Config>(config_path.as_path())?;
+    let config = load_config::<Config>(config_path)?;
 
-    let files = collect_all_supported_files::<Language>(&files_path);
+    let files = collect_all_supported_files::<Language>(files_path);
     let file_contents = read_files_to_strings(&files)?;
 
     let mut engine = Engine::<Language, Config>::new(pipeline);
