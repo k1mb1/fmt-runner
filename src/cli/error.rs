@@ -21,6 +21,9 @@ pub enum CliError {
     #[error("Config file has unsupported extension")]
     UnsupportedConfigExtension,
 
+    #[error("Config path points to a directory, but a file was expected")]
+    ConfigPathIsDirectory,
+
     #[error("YAML parsing error: {source}")]
     YamlError {
         #[from]
