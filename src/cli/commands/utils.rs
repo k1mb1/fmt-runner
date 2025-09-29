@@ -66,14 +66,14 @@ pub(crate) fn load_config<Config>(config_path: &Path) -> CliResult<Config>
 where
     Config: Serialize + DeserializeOwned + Default,
 {
-    print!("Loading config from {}...\n", config_path.display());
-    let config = if exists_config(&config_path)? {
-        validate_config::<Config>(&config_path)?;
+    println!("Loading config from {}...", config_path.display());
+    let config = if exists_config(config_path)? {
+        validate_config::<Config>(config_path)?;
         from_file(config_path)?
     } else {
-        check_extension(&config_path)?;
-        print!(
-            "Config file not found, creating default at {}...\n",
+        check_extension(config_path)?;
+        println!(
+            "Config file not found, creating default at {}...",
             config_path.display()
         );
         Config::default()
