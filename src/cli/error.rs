@@ -24,6 +24,9 @@ pub enum CliError {
     #[error("Config path points to a directory, but a file was expected")]
     ConfigPathIsDirectory,
 
+    #[error("Invalid argument '{arg}' with value '{value}'")]
+    InvalidArgument { arg: String, value: String },
+
     #[error("YAML parsing error: {source}")]
     YamlError {
         #[from]

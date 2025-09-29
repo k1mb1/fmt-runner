@@ -1,5 +1,22 @@
 use clap::{Arg, Command};
 
+/// Format mode
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FormatMode {
+    Check,
+    Write,
+}
+
+impl FormatMode {
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "check" => Some(Self::Check),
+            "write" => Some(Self::Write),
+            _ => None,
+        }
+    }
+}
+
 /// CLI commands
 #[derive(Debug, Clone, Copy)]
 pub enum CliCommand {
@@ -54,6 +71,15 @@ pub fn build_cli(bin_name: &str) -> Command {
                         .value_name("FILES")
                         .default_value(".")
                         .num_args(1..),
+                )
+                .arg(
+                    Arg::new("mode")
+                        .short('m')
+                        .long("mode")
+                        .value_name("MODE")
+                        .default_value("check")
+                        .value_parser(["check", "write"])
+                        .help("Format mode: 'check' to only verify formatting, 'write' to apply changes"),
                 ),
         )
 }

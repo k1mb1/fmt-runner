@@ -1,4 +1,4 @@
-use crate::cli::cli_entry::{build_cli, CliCommand};
+use crate::cli::cli_entry::{build_cli, CliCommand, FormatMode};
 use crate::cli::commands::{format, init};
 use crate::cli::error::{exit_with_error, CliError, CliResult};
 use crate::parser::LanguageProvider;
@@ -116,10 +116,22 @@ where
         .cloned()
         .collect();
 
+    let mode_str = sub_matches
+        .get_one::<String>("mode")
+        .map(|s| s.as_str())
+        .unwrap_or("check");
+
+    let mode = FormatMode::from_str(mode_str)
+        .ok_or_else(|| CliError::InvalidArgument {
+            arg: "mode".to_string(),
+            value: mode_str.to_string(),
+        })?;
+
     format::<Language, Config>(
         config_path.into(),
         files_path.into_iter().map(Into::into).collect(),
         pipeline,
+        mode,
     )?;
 
     Ok(())
