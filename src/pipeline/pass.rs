@@ -33,7 +33,7 @@ pub trait StructuredPass {
     type Item;
 
     /// Парсим AST и находим все целевые фрагменты для форматирования
-    fn find_targets(&self, root: &Node, source: &str) -> Vec<EditTarget<Self::Item>>;
+    fn extract(&self, root: &Node, source: &str) -> Vec<EditTarget<Self::Item>>;
 
     /// Трансформируем элементы (сортировка, выравнивание, удаление и т.п.)
     fn transform(
@@ -59,7 +59,7 @@ where
     fn run(&self, config: &Self::Config, root: &Node, source: &str) -> Vec<Edit> {
         let mut edits = Vec::new();
 
-        for mut target in self.find_targets(root, source) {
+        for mut target in self.extract(root, source) {
             if target.items.is_empty() {
                 continue;
             }
