@@ -43,30 +43,26 @@ impl<Language: LanguageProvider> Parser<Language> {
         old_end_byte: usize,
         new_text: &str,
     ) {
-        state
-            .source
-            .replace_range(start_byte..old_end_byte, new_text);
+        let start_point = state.byte_to_point(start_byte);
+        let old_end_point = state.byte_to_point(old_end_byte);
+
+        let new_end_byte = start_byte + new_text.len();
+
+        state.replace_range(start_byte..old_end_byte, new_text);
+
+        let new_end_point = state.byte_to_point(new_end_byte);
+
         if let Some(tree) = &mut state.tree {
             let edit = InputEdit {
                 start_byte,
                 old_end_byte,
-                new_end_byte: start_byte + new_text.len(),
-                start_position: tree_sitter::Point {
-                    row: 0,
-                    column: start_byte,
-                },
-                old_end_position: tree_sitter::Point {
-                    row: 0,
-                    column: old_end_byte,
-                },
-                new_end_position: tree_sitter::Point {
-                    row: 0,
-                    column: start_byte + new_text.len(),
-                },
+                new_end_byte,
+                start_position: start_point,
+                old_end_position: old_end_point,
+                new_end_position: new_end_point,
             };
             tree.edit(&edit);
         }
-        self.reparse(state);
     }
 }
 

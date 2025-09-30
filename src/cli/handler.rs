@@ -33,6 +33,7 @@ fn parse_mode(mode_str: &str) -> Option<FormatMode> {
     match mode_str {
         mode if mode == FormatMode::Check.as_str() => Some(FormatMode::Check),
         mode if mode == FormatMode::Write.as_str() => Some(FormatMode::Write),
+        mode if mode == FormatMode::Diff.as_str() => Some(FormatMode::Diff),
         _ => None,
     }
 }

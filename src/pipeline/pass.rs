@@ -1,3 +1,4 @@
+use crate::pipeline::context::FormatterContext;
 use crate::pipeline::edit::{Edit, EditTarget};
 use serde::{de::DeserializeOwned, Serialize};
 use tree_sitter::Node;
@@ -17,8 +18,11 @@ use tree_sitter::Node;
 /// impl Pass for MyPass {
 ///     type Config = MyConfig;
 ///
-///     fn run(&self, config: &Self::Config, root: &Node, source: &str) -> Vec<Edit> {
-///         // Analyze AST and return edits
+///     fn run(&self, context: &mut FormatterContext<'_, '_, Self::Config>) -> Vec<Edit> {
+///         let root = context.root();
+///         let source = context.source();
+///         let config = context.config();
+///         // Analyze AST and return edits using the context
 ///         vec![]
 ///     }
 /// }
@@ -30,13 +34,11 @@ pub trait Pass {
     /// Run the pass on the given AST and source code.
     ///
     /// # Arguments
-    /// * `config` - The configuration for this pass
-    /// * `root` - The root node of the AST
-    /// * `source` - The source code
+    /// * `context` - Shared formatter context containing config, AST, source, and diagnostics sink
     ///
     /// # Returns
     /// A vector of edits to apply to the source code
-    fn run(&self, config: &Self::Config, root: &Node, source: &str) -> Vec<Edit>;
+    fn run(&self, context: &mut FormatterContext<'_, '_, Self::Config>) -> Vec<Edit>;
 }
 
 /// Type-erased wrapper for passes to enable dynamic dispatch.
@@ -45,15 +47,15 @@ pub trait Pass {
 /// in a single collection by erasing the associated type information.
 pub trait ErasedPass<Config> {
     /// Run the pass with the given configuration.
-    fn run(&self, config: &Config, root: &Node, source: &str) -> Vec<Edit>;
+    fn run(&self, context: &mut FormatterContext<'_, '_, Config>) -> Vec<Edit>;
 }
 
 impl<T> ErasedPass<<T as Pass>::Config> for T
 where
     T: Pass,
 {
-    fn run(&self, config: &<T as Pass>::Config, root: &Node, source: &str) -> Vec<Edit> {
-        <T as Pass>::run(self, config, root, source)
+    fn run(&self, context: &mut FormatterContext<'_, '_, <T as Pass>::Config>) -> Vec<Edit> {
+        <T as Pass>::run(self, context)
     }
 }
 
@@ -133,20 +135,22 @@ where
 {
     type Config = <T as StructuredPass>::Config;
 
-    fn run(&self, config: &Self::Config, root: &Node, source: &str) -> Vec<Edit> {
+    fn run(&self, context: &mut FormatterContext<'_, '_, Self::Config>) -> Vec<Edit> {
         let mut edits = Vec::new();
+        let root = context.root();
+        let source = context.source();
 
-        for mut target in self.extract(root, source) {
+        for mut target in self.extract(&root, source) {
             if target.items.is_empty() {
                 continue;
             }
 
-            if let Err(err) = self.transform(root, source, config, &mut target.items) {
-                eprintln!("Transform error in pass: {}", err);
+            if let Err(err) = self.transform(&root, source, context.config(), &mut target.items) {
+                context.error(format!("Transform error: {err}"), Some(target.range));
                 continue;
             }
 
-            let content = self.build(config, &target.items);
+            let content = self.build(context.config(), &target.items);
             edits.push(Edit {
                 range: target.range,
                 content,
