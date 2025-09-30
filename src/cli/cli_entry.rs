@@ -7,17 +7,21 @@ pub enum FormatMode {
     Check,
     /// Format files and write changes to disk
     Write,
+    /// Show a unified diff of the changes without modifying files
+    Diff,
 }
 
 impl FormatMode {
     const CHECK: &'static str = "check";
     const WRITE: &'static str = "write";
+    const DIFF: &'static str = "diff";
 
     /// Get the string representation of the format mode.
     pub fn as_str(self) -> &'static str {
         match self {
             FormatMode::Check => Self::CHECK,
             FormatMode::Write => Self::WRITE,
+            FormatMode::Diff => Self::DIFF,
         }
     }
 }
@@ -104,11 +108,16 @@ pub fn build_cli(bin_name: &str) -> Command {
                         .long("mode")
                         .value_name("MODE")
                         .default_value(FormatMode::Check.as_str())
-                        .value_parser([FormatMode::Check.as_str(), FormatMode::Write.as_str()])
-                        .help(format!(
-                            "Format mode: '{}' to only verify formatting, '{}' to apply changes",
+                        .value_parser([
                             FormatMode::Check.as_str(),
-                            FormatMode::Write.as_str()
+                            FormatMode::Write.as_str(),
+                            FormatMode::Diff.as_str(),
+                        ])
+                        .help(format!(
+                            "Format mode: '{}' to only verify formatting, '{}' to apply changes, '{}' to print a unified diff",
+                            FormatMode::Check.as_str(),
+                            FormatMode::Write.as_str(),
+                            FormatMode::Diff.as_str()
                         )),
                 ),
         )

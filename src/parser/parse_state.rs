@@ -8,6 +8,7 @@ use tree_sitter::Tree;
 pub struct ParseState {
     pub(crate) source: String,
     pub(crate) tree: Option<Tree>,
+    line_offsets: Vec<usize>,
 }
 
 impl ParseState {
@@ -24,7 +25,12 @@ impl ParseState {
     /// assert_eq!(state.source(), "fn main() {}");
     /// ```
     pub fn new(source: String) -> Self {
-        Self { source, tree: None }
+        let line_offsets = Self::compute_line_offsets(&source);
+        Self {
+            source,
+            tree: None,
+            line_offsets,
+        }
     }
 
     /// Get a reference to the latest parse tree, if any.
@@ -42,6 +48,50 @@ impl ParseState {
     /// Check if the parse state has a valid tree.
     pub fn has_tree(&self) -> bool {
         self.tree.is_some()
+    }
+
+    /// Convert a byte offset to a `tree_sitter::Point`.
+    pub(crate) fn byte_to_point(&self, byte: usize) -> tree_sitter::Point {
+        let byte = byte.min(self.source.len());
+
+        match self.line_offsets.binary_search(&byte) {
+            Ok(line) => tree_sitter::Point {
+                row: line,
+                column: 0,
+            },
+            Err(0) => tree_sitter::Point { row: 0, column: byte },
+            Err(insert_pos) => {
+                let line = insert_pos - 1;
+                let line_start = self.line_offsets[line];
+                tree_sitter::Point {
+                    row: line,
+                    column: byte - line_start,
+                }
+            }
+        }
+    }
+
+    /// Replace the range in the source, updating the line index.
+    pub(crate) fn replace_range(&mut self, range: std::ops::Range<usize>, replacement: &str) {
+        self.source.replace_range(range, replacement);
+        self.refresh_line_offsets();
+    }
+
+    fn refresh_line_offsets(&mut self) {
+        self.line_offsets = Self::compute_line_offsets(&self.source);
+    }
+
+    fn compute_line_offsets(source: &str) -> Vec<usize> {
+        let mut offsets = Vec::with_capacity(source.len() / 16 + 1);
+        offsets.push(0);
+
+        for (idx, byte) in source.bytes().enumerate() {
+            if byte == b'\n' {
+                offsets.push(idx + 1);
+            }
+        }
+
+        offsets
     }
 }
 
@@ -62,5 +112,29 @@ mod tests {
     fn test_has_tree() {
         let state = ParseState::new("test".to_string());
         assert!(!state.has_tree());
+    }
+
+    #[test]
+    fn test_byte_to_point_single_line() {
+        let state = ParseState::new("abcdef".to_string());
+        let point = state.byte_to_point(3);
+        assert_eq!(point.row, 0);
+        assert_eq!(point.column, 3);
+    }
+
+    #[test]
+    fn test_byte_to_point_multi_line() {
+        let state = ParseState::new("ab\ncdef\ng".to_string());
+        let point_line1 = state.byte_to_point(3); // newline position -> start of second line
+        assert_eq!(point_line1.row, 1);
+        assert_eq!(point_line1.column, 0);
+
+    let point_line2 = state.byte_to_point(6);
+        assert_eq!(point_line2.row, 1);
+    assert_eq!(point_line2.column, 3);
+
+        let point_line3 = state.byte_to_point(8);
+        assert_eq!(point_line3.row, 2);
+        assert_eq!(point_line3.column, 0);
     }
 }

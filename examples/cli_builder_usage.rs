@@ -1,7 +1,6 @@
-use fmt_runner::{cli_builder, Edit, LanguageProvider, Pass, Pipeline, SupportedExtension};
+use fmt_runner::{cli_builder, Edit, FormatterContext, LanguageProvider, Pass, Pipeline, SupportedExtension};
 use log::info;
 use serde::{Deserialize, Serialize};
-use tree_sitter::Node;
 
 /// Example configuration for the formatter
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -16,11 +15,11 @@ struct IndentationPass;
 impl Pass for IndentationPass {
     type Config = MyConfig;
 
-    fn run(&self, config: &Self::Config, _root: &Node, _source: &str) -> Vec<Edit> {
+    fn run(&self, context: &mut FormatterContext<'_, '_, Self::Config>) -> Vec<Edit> {
         // Example implementation - in real code you'd analyze the AST
         info!(
             "Running indentation pass with indent_size: {}",
-            config.indent_size
+            context.config().indent_size
         );
         Vec::new()
     }
@@ -32,11 +31,11 @@ struct LineLengthPass;
 impl Pass for LineLengthPass {
     type Config = MyConfig;
 
-    fn run(&self, config: &Self::Config, _root: &Node, _source: &str) -> Vec<Edit> {
+    fn run(&self, context: &mut FormatterContext<'_, '_, Self::Config>) -> Vec<Edit> {
         // Example implementation - in real code you'd analyze the AST
         info!(
             "Running line length pass with max_line_length: {}",
-            config.max_line_length
+            context.config().max_line_length
         );
         Vec::new()
     }
