@@ -2,6 +2,13 @@
 name = "fmt-runner"
 version = "0.1.0"
 edition = "2021"
+authors = ["k1mb1"]
+description = "A flexible code formatting runner with tree-sitter based parsing and pipeline transformations"
+repository = "https://github.com/k1mb1/fmt-runner"
+license = "MIT"
+keywords = ["formatter", "code-formatting", "tree-sitter", "cli"]
+categories = ["command-line-utilities", "development-tools"]
+readme = "README.md"
 
 [lib]
 name = "fmt_runner"
