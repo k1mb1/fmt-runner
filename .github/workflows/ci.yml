@@ -4,9 +4,11 @@ on:
   pull_request:
     branches:
       - main
+      - dev
   push:
     branches:
       - main
+      - dev
 
 jobs:
   build-and-test:
@@ -56,5 +58,10 @@ jobs:
       - name: Run doctests
         run: cargo test --doc
 
-      - name: Generate code coverage report
+      - name: Generate code coverage report (main)
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: cargo llvm-cov --all-features --workspace --fail-under-lines 80
+
+      - name: Generate code coverage report (dev)
+        if: github.base_ref == 'dev' || github.ref == 'refs/heads/dev'
+        run: cargo llvm-cov --all-features --workspace --fail-under-lines 40
