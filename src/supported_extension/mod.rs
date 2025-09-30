@@ -34,23 +34,68 @@ impl SupportedExtension {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
 
     const SUPPORTED: SupportedExtension = SupportedExtension::new(&["rs", "toml", "md"]);
 
-    #[test]
-    fn test_contains() {
-        assert!(SUPPORTED.contains("rs"));
-        assert!(SUPPORTED.contains("RS"));
-        assert!(SUPPORTED.contains("Md"));
-        assert!(!SUPPORTED.contains("exe"));
+    #[rstest]
+    #[case("rs", true)]
+    #[case("RS", true)]
+    #[case("Md", true)]
+    #[case("toml", true)]
+    #[case("TOML", true)]
+    #[case("exe", false)]
+    #[case("txt", false)]
+    fn test_contains(#[case] extension: &str, #[case] expected: bool) {
+        assert_eq!(SUPPORTED.contains(extension), expected);
+    }
+
+    #[rstest]
+    #[case("foo.rs", true)]
+    #[case("bar.TOML", true)]
+    #[case("/baz/qux.md", true)]
+    #[case("test.MD", true)]
+    #[case("noext", false)]
+    #[case("foo.exe", false)]
+    #[case("test.txt", false)]
+    fn test_matches(#[case] path: &str, #[case] expected: bool) {
+        assert_eq!(SUPPORTED.matches(Path::new(path)), expected);
     }
 
     #[test]
-    fn test_matches() {
-        assert!(SUPPORTED.matches(Path::new("foo.rs")));
-        assert!(SUPPORTED.matches(Path::new("bar.TOML")));
-        assert!(SUPPORTED.matches(Path::new("/baz/qux.md")));
-        assert!(!SUPPORTED.matches(Path::new("noext")));
-        assert!(!SUPPORTED.matches(Path::new("foo.exe")));
+    fn test_config_extensions() {
+        assert!(CONFIG_EXTENSIONS.matches(Path::new("config.yml")));
+        assert!(CONFIG_EXTENSIONS.matches(Path::new("config.yaml")));
+        assert!(CONFIG_EXTENSIONS.matches(Path::new("config.YML")));
+        assert!(CONFIG_EXTENSIONS.matches(Path::new("config.YAML")));
+        assert!(!CONFIG_EXTENSIONS.matches(Path::new("config.txt")));
+    }
+
+    #[test]
+    fn test_new() {
+        let custom = SupportedExtension::new(&["json", "xml"]);
+        assert!(custom.matches(Path::new("data.json")));
+        assert!(custom.matches(Path::new("data.xml")));
+        assert!(!custom.matches(Path::new("data.txt")));
+    }
+
+    #[test]
+    fn test_empty_extensions() {
+        let empty = SupportedExtension::new(&[]);
+        assert!(!empty.matches(Path::new("test.rs")));
+        assert!(!empty.matches(Path::new("test.txt")));
+    }
+
+    #[test]
+    fn test_path_without_extension() {
+        assert!(!SUPPORTED.matches(Path::new("noextension")));
+        assert!(!SUPPORTED.matches(Path::new("/path/to/file")));
+    }
+
+    #[test]
+    fn test_debug_impl() {
+        let formatted = format!("{:?}", SUPPORTED);
+        assert!(formatted.contains("SupportedExtension"));
+        assert!(formatted.contains("extensions"));
     }
 }
