@@ -1,4 +1,3 @@
-use crate::cli::cli_entry::FormatMode;
 use crate::cli::commands::{ConfigLoader, FileCollector, FileReader};
 use crate::cli::error::CliResult;
 use crate::core::Engine;
@@ -9,24 +8,13 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::path::{Path, PathBuf};
 
-/// Execute the format command with improved architecture and performance.
-///
-/// This function coordinates:
-/// 1. Configuration loading via ConfigLoader
-/// 2. File collection via FileCollector
-/// 3. File reading via FileReader (optimized for large files)
-/// 4. Formatting via Engine
-///
-/// # Arguments
-/// * `config_path` - Path to the configuration file
-/// * `files_path` - Paths to files or directories to format
-/// * `pipeline` - The formatting pipeline to apply
-/// * `mode` - Format mode (check or write)
+/// Execute the format or check command with improved architecture and performance.
 pub fn execute<Language, Config>(
     config_path: &Path,
     files_path: &[PathBuf],
     pipeline: Pipeline<Config>,
-    mode: FormatMode,
+    write_changes: bool,
+    show_diff: bool,
 ) -> CliResult<()>
 where
     Config: Serialize + DeserializeOwned + Default,
@@ -48,9 +36,10 @@ where
 
     let mut engine = Engine::<Language, Config>::new(pipeline);
 
-    match mode {
-        FormatMode::Check => execute_check_mode(&mut engine, &config, &file_contents, &files),
-        FormatMode::Write => execute_write_mode(&mut engine, &config, &file_contents, &files)?,
+    if write_changes {
+        execute_write_mode(&mut engine, &config, &file_contents, &files)?;
+    } else {
+        execute_check_mode(&mut engine, &config, &file_contents, &files, show_diff);
     }
 
     Ok(())
@@ -62,6 +51,7 @@ fn execute_check_mode<Language, Config>(
     config: &Config,
     file_contents: &[String],
     files: &[PathBuf],
+    show_diff: bool,
 ) where
     Config: Serialize + DeserializeOwned + Default,
     Language: LanguageProvider,
@@ -79,7 +69,14 @@ fn execute_check_mode<Language, Config>(
         for file in &changed_files {
             warn!("  - {}", file.display());
         }
-        info!("\nRun with --mode write to apply formatting.");
+        
+        if show_diff {
+            warn!("\nDifferences:");
+            // TODO: Implement diff display
+            warn!("  (diff display not yet implemented)");
+        }
+        
+        info!("\nRun 'format' command to apply formatting.");
     }
 }
 

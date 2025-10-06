@@ -1,4 +1,4 @@
-use crate::cli::cli_entry::{build_cli, CliCommand, FormatMode};
+use crate::cli::cli_entry::{build_cli, CliCommand};
 use crate::cli::commands::{format, init};
 use crate::cli::error::{exit_with_error, CliError, CliResult};
 use crate::parser::LanguageProvider;
@@ -18,21 +18,7 @@ fn parse_command(cmd_str: &str) -> Option<CliCommand> {
     match cmd_str {
         cmd if cmd == CliCommand::Init.as_str() => Some(CliCommand::Init),
         cmd if cmd == CliCommand::Format.as_str() => Some(CliCommand::Format),
-        _ => None,
-    }
-}
-
-/// Parse mode string to `FormatMode` enum.
-///
-/// # Arguments
-/// * `mode_str` - The mode string to parse
-///
-/// # Returns
-/// `Some(FormatMode)` if the string matches a known mode, `None` otherwise
-fn parse_mode(mode_str: &str) -> Option<FormatMode> {
-    match mode_str {
-        mode if mode == FormatMode::Check.as_str() => Some(FormatMode::Check),
-        mode if mode == FormatMode::Write.as_str() => Some(FormatMode::Write),
+        cmd if cmd == CliCommand::Check.as_str() => Some(CliCommand::Check),
         _ => None,
     }
 }
@@ -83,6 +69,9 @@ where
             }
             Some(CliCommand::Format) => {
                 handle_format_command::<Language, Config>(sub_matches, pipeline)?;
+            }
+            Some(CliCommand::Check) => {
+                handle_check_command::<Language, Config>(sub_matches, pipeline)?;
             }
             None => {
                 exit_with_error(&CliError::UnknownCommand {
@@ -159,18 +148,44 @@ where
         .cloned()
         .collect();
 
-    let mode_str = sub_matches
-        .get_one::<String>("mode")
-        .map_or(FormatMode::Check.as_str(), std::string::String::as_str);
+    let files_path: Vec<PathBuf> = files_path.into_iter().map(PathBuf::from).collect();
 
-    let mode = parse_mode(mode_str).ok_or_else(|| CliError::InvalidArgument {
-        arg: "mode".to_string(),
-        value: mode_str.to_string(),
-    })?;
+    format::<Language, Config>(Path::new(config_path), &files_path, pipeline, true, false)?;
+
+    Ok(())
+}
+
+/// Handle the 'check' subcommand.
+///
+/// # Arguments
+/// * `sub_matches` - Command line argument matches for the check subcommand
+/// * `pipeline` - The formatting pipeline to use
+///
+/// # Returns
+/// `Ok(())` on success, or a CLI error
+fn handle_check_command<Language, Config>(
+    sub_matches: &clap::ArgMatches,
+    pipeline: Pipeline<Config>,
+) -> CliResult<()>
+where
+    Config: Serialize + DeserializeOwned + Default,
+    Language: LanguageProvider,
+{
+    let config_path = sub_matches
+        .get_one::<String>("config_path")
+        .ok_or(CliError::ConfigPathMissing)?;
+
+    let files_path: Vec<String> = sub_matches
+        .get_many::<String>("files_path")
+        .ok_or(CliError::FilesPathMissing)?
+        .cloned()
+        .collect();
+
+    let show_diff = sub_matches.get_flag("diff");
 
     let files_path: Vec<PathBuf> = files_path.into_iter().map(PathBuf::from).collect();
 
-    format::<Language, Config>(Path::new(config_path), &files_path, pipeline, mode)?;
+    format::<Language, Config>(Path::new(config_path), &files_path, pipeline, false, show_diff)?;
 
     Ok(())
 }
