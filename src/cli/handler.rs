@@ -1,5 +1,5 @@
 use crate::cli::cli_entry::{build_cli, CliCommand};
-use crate::cli::commands::{format, init};
+use crate::cli::commands::{check, format, init};
 use crate::cli::error::{exit_with_error, CliError, CliResult};
 use crate::parser::LanguageProvider;
 use crate::pipeline::Pipeline;
@@ -150,7 +150,7 @@ where
 
     let files_path: Vec<PathBuf> = files_path.into_iter().map(PathBuf::from).collect();
 
-    format::<Language, Config>(Path::new(config_path), &files_path, pipeline, true, false)?;
+    format::<Language, Config>(Path::new(config_path), &files_path, pipeline)?;
 
     Ok(())
 }
@@ -185,7 +185,7 @@ where
 
     let files_path: Vec<PathBuf> = files_path.into_iter().map(PathBuf::from).collect();
 
-    format::<Language, Config>(Path::new(config_path), &files_path, pipeline, false, show_diff)?;
+    check::<Language, Config>(Path::new(config_path), &files_path, pipeline, show_diff)?;
 
     Ok(())
 }

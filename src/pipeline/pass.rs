@@ -1,4 +1,4 @@
-use crate::pipeline::edit::{Edit, EditTarget};
+use crate::pipeline::edit::Edit;
 use serde::{de::DeserializeOwned, Serialize};
 use tree_sitter::Node;
 
@@ -87,8 +87,8 @@ pub trait StructuredPass {
     /// * `source` - The source code
     ///
     /// # Returns
-    /// A vector of edit targets, each containing a range and items
-    fn extract(&self, root: &Node, source: &str) -> Vec<EditTarget<Self::Item>>;
+    /// A vector of edits with items, each containing a range and items to be transformed
+    fn extract(&self, root: &Node, source: &str) -> Vec<Edit<Self::Item>>;
 
     /// Transform the items according to formatting rules.
     ///
@@ -147,10 +147,7 @@ where
             }
 
             let content = self.build(config, &target.items);
-            edits.push(Edit {
-                range: target.range,
-                content,
-            });
+            edits.push(target.with_content(content));
         }
 
         edits

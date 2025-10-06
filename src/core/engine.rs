@@ -69,8 +69,11 @@ impl<Language: LanguageProvider, C> Engine<Language, C> {
             // Apply each edit
             for edit in edits {
                 debug!("Applying edit at range {:?}", edit.range);
+                let content = edit
+                    .content
+                    .expect("Edit should have content after pass.run()");
                 self.parser
-                    .apply_edit(state, edit.range.0, edit.range.1, &edit.content);
+                    .apply_edit(state, edit.range.0, edit.range.1, &content);
             }
         }
     }
