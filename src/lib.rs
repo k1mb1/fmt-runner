@@ -1,10 +1,10 @@
 mod cli;
 mod core;
-mod parser;
+pub mod parser;
 mod pipeline;
-mod supported_extension;
+pub mod supported_extension;
 
-pub use cli::{cli_builder, CliBuilder};
+pub use cli::{cli_builder, CliBuilder, CliError, CliResult};
 pub use core::Engine;
 pub use parser::{LanguageProvider, ParseState, Parser};
 pub use pipeline::{Edit, EditTarget, Pass, Pipeline, StructuredPass};

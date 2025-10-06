@@ -18,8 +18,7 @@ impl SupportedExtension {
     ///
     /// This is a private helper method used by the public `matches` method.
     fn contains(&self, extension: &str) -> bool {
-        let ext = extension.to_ascii_lowercase();
-        self.extensions.iter().any(|&e| e == ext)
+        self.extensions.contains(&extension.to_lowercase().as_str())
     }
 
     /// Returns true if the path's extension matches one of this set (case-insensitive).
@@ -34,23 +33,27 @@ impl SupportedExtension {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
 
     const SUPPORTED: SupportedExtension = SupportedExtension::new(&["rs", "toml", "md"]);
 
-    #[test]
-    fn test_contains() {
-        assert!(SUPPORTED.contains("rs"));
-        assert!(SUPPORTED.contains("RS"));
-        assert!(SUPPORTED.contains("Md"));
-        assert!(!SUPPORTED.contains("exe"));
+    #[rstest]
+    #[case("foo.rs", true)]
+    #[case("bar.TOML", true)]
+    #[case("/baz/qux.md", true)]
+    #[case("test.MD", true)]
+    #[case("noext", false)]
+    #[case("foo.exe", false)]
+    #[case("test.txt", false)]
+    fn test_matches(#[case] path: &str, #[case] expected: bool) {
+        assert_eq!(SUPPORTED.matches(Path::new(path)), expected);
     }
 
     #[test]
-    fn test_matches() {
-        assert!(SUPPORTED.matches(Path::new("foo.rs")));
-        assert!(SUPPORTED.matches(Path::new("bar.TOML")));
-        assert!(SUPPORTED.matches(Path::new("/baz/qux.md")));
-        assert!(!SUPPORTED.matches(Path::new("noext")));
-        assert!(!SUPPORTED.matches(Path::new("foo.exe")));
+    fn test_new() {
+        let custom = SupportedExtension::new(&["json", "xml"]);
+        assert!(custom.matches(Path::new("data.json")));
+        assert!(custom.matches(Path::new("data.xml")));
+        assert!(!custom.matches(Path::new("data.txt")));
     }
 }

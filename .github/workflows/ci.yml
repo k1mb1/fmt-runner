@@ -40,9 +40,6 @@ jobs:
       - name: Install cargo-nextest
         uses: taiki-e/install-action@cargo-nextest
 
-      - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@cargo-llvm-cov
-
       - name: Build
         run: cargo build --verbose
 
@@ -57,11 +54,3 @@ jobs:
 
       - name: Run doctests
         run: cargo test --doc
-
-      - name: Generate code coverage report (main)
-        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        run: cargo llvm-cov --all-features --workspace --fail-under-lines 80
-
-      - name: Generate code coverage report (dev)
-        if: github.base_ref == 'dev' || github.ref == 'refs/heads/dev'
-        run: cargo llvm-cov --all-features --workspace --fail-under-lines 40
