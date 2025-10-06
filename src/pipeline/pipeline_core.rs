@@ -1,3 +1,4 @@
+use crate::core::ConfigProvider;
 use crate::pipeline::pass::ErasedPass;
 use crate::pipeline::Pass;
 
@@ -16,19 +17,16 @@ use crate::pipeline::Pass;
 /// pipeline.add_pass(MyFirstPass);
 /// pipeline.add_pass(MySecondPass);
 /// ```
-pub struct Pipeline<Config> {
+pub struct Pipeline<Config: ConfigProvider> {
     passes: Vec<Box<dyn ErasedPass<Config>>>,
 }
 
-impl<Config> Pipeline<Config> {
+impl<Config: ConfigProvider> Pipeline<Config> {
     pub fn new() -> Self {
         Self { passes: Vec::new() }
     }
 
-    pub fn add_pass<P>(&mut self, pass: P) -> &mut Self
-    where
-        P: Pass<Config = Config> + 'static,
-    {
+    pub fn add_pass<P: Pass<Config = Config> + 'static>(&mut self, pass: P) -> &mut Self {
         self.passes.push(Box::new(pass));
         self
     }
@@ -46,7 +44,7 @@ impl<Config> Pipeline<Config> {
     }
 }
 
-impl<Config> Default for Pipeline<Config> {
+impl<Config: ConfigProvider> Default for Pipeline<Config> {
     fn default() -> Self {
         Self::new()
     }
@@ -56,7 +54,7 @@ impl<Config> Default for Pipeline<Config> {
 mod tests {
     use super::*;
 
-    #[derive(Debug)]
+    #[derive(Debug, Default)]
     struct DummyConfig;
 
     impl serde::Serialize for DummyConfig {

@@ -1,8 +1,7 @@
 use crate::cli::error::{CliError, CliResult};
+use crate::core::ConfigProvider;
 use crate::supported_extension::CONFIG_EXTENSIONS;
 use log::{debug, info};
-use serde::de::DeserializeOwned;
-use serde::Serialize;
 use std::fs;
 use std::path::Path;
 
@@ -10,10 +9,7 @@ use std::path::Path;
 pub struct ConfigLoader;
 
 impl ConfigLoader {
-    pub fn load<Config>(config_path: &Path) -> CliResult<Config>
-    where
-        Config: Serialize + DeserializeOwned + Default,
-    {
+    pub fn load<Config: ConfigProvider>(config_path: &Path) -> CliResult<Config> {
         info!("Loading config from {}...", config_path.display());
 
         let config = if Self::exists(config_path)? {
@@ -31,7 +27,7 @@ impl ConfigLoader {
         Ok(config)
     }
 
-    pub fn create_default_file<Config: Serialize + Default>(path: &Path) -> CliResult<()> {
+    pub fn create_default_file<Config: ConfigProvider>(path: &Path) -> CliResult<()> {
         let default_config = Config::default();
         let yaml = serde_yaml::to_string(&default_config)?;
 
@@ -57,10 +53,7 @@ impl ConfigLoader {
         }
     }
 
-    pub fn validate<Config>(path: &Path) -> CliResult<()>
-    where
-        Config: Serialize + DeserializeOwned + Default,
-    {
+    pub fn validate<Config: ConfigProvider>(path: &Path) -> CliResult<()> {
         Self::load::<Config>(path)?;
         Ok(())
     }
@@ -72,16 +65,16 @@ impl ConfigLoader {
         Ok(())
     }
 
-    fn from_str<Config: DeserializeOwned>(yaml: &str) -> CliResult<Config> {
+    fn from_str<Config: ConfigProvider>(yaml: &str) -> CliResult<Config> {
         serde_yaml::from_str(yaml).map_err(CliError::from)
     }
 
-    fn from_file<Config: DeserializeOwned>(config_path: &Path) -> CliResult<Config> {
+    fn from_file<Config: ConfigProvider>(config_path: &Path) -> CliResult<Config> {
         let config_content = fs::read_to_string(config_path)?;
         Self::from_str(&config_content)
     }
 
-    fn validate_config<Config: DeserializeOwned>(path: &Path) -> CliResult<()> {
+    fn validate_config<Config: ConfigProvider>(path: &Path) -> CliResult<()> {
         Self::from_file::<Config>(path)?;
         Ok(())
     }

@@ -1,18 +1,18 @@
+use crate::core::ConfigProvider;
 use crate::parser::{LanguageProvider, ParseState, Parser};
 use crate::pipeline::Pipeline;
 use log::debug;
 use std::marker::PhantomData;
 use std::path::PathBuf;
 
-// ...existing code...
-pub struct Engine<Language: LanguageProvider, Config> {
+pub struct Engine<Language: LanguageProvider, Config: ConfigProvider> {
     pipeline: Pipeline<Config>,
     parser: Parser<Language>,
     _marker: PhantomData<(Language, Config)>,
 }
 
-impl<Language: LanguageProvider, C> Engine<Language, C> {
-    pub fn new(pipeline: Pipeline<C>) -> Self {
+impl<Language: LanguageProvider, Config: ConfigProvider> Engine<Language, Config> {
+    pub fn new(pipeline: Pipeline<Config>) -> Self {
         Self {
             pipeline,
             parser: Parser::new(),
@@ -20,7 +20,7 @@ impl<Language: LanguageProvider, C> Engine<Language, C> {
         }
     }
 
-    fn run(&mut self, config: &C, state: &mut ParseState) {
+    fn run(&mut self, config: &Config, state: &mut ParseState) {
         // Ensure we have a parsed tree
         if !state.has_tree() {
             self.parser.parse(state);
@@ -52,7 +52,7 @@ impl<Language: LanguageProvider, C> Engine<Language, C> {
         }
     }
 
-    pub fn check(&mut self, config: &C, codes: &[String], files: &[PathBuf]) -> Vec<PathBuf> {
+    pub fn check(&mut self, config: &Config, codes: &[String], files: &[PathBuf]) -> Vec<PathBuf> {
         let mut changed_files = Vec::new();
 
         for (i, code) in codes.iter().enumerate() {
@@ -69,7 +69,7 @@ impl<Language: LanguageProvider, C> Engine<Language, C> {
 
     pub fn format_and_write(
         &mut self,
-        config: &C,
+        config: &Config,
         codes: &[String],
         files: &[PathBuf],
     ) -> Result<Vec<PathBuf>, std::io::Error> {

@@ -1,23 +1,15 @@
 use crate::cli::handler::handle_cli;
+use crate::core::ConfigProvider;
 use crate::parser::LanguageProvider;
 use crate::pipeline::{Pass, Pipeline};
-use serde::{de::DeserializeOwned, Serialize};
 use std::marker::PhantomData;
 
-pub struct CliBuilder<Language, Config>
-where
-    Config: Serialize + DeserializeOwned + Default,
-    Language: LanguageProvider,
-{
+pub struct CliBuilder<Language: LanguageProvider, Config: ConfigProvider> {
     pipeline: Pipeline<Config>,
     _language_marker: PhantomData<Language>,
 }
 
-impl<Language, Config> CliBuilder<Language, Config>
-where
-    Config: Serialize + DeserializeOwned + Default,
-    Language: LanguageProvider,
-{
+impl<Language: LanguageProvider, Config: ConfigProvider> CliBuilder<Language, Config> {
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -27,10 +19,7 @@ where
     }
 
     #[must_use]
-    pub fn add_pass<P>(mut self, pass: P) -> Self
-    where
-        P: Pass<Config = Config> + 'static,
-    {
+    pub fn add_pass<P: Pass<Config = Config> + 'static>(mut self, pass: P) -> Self {
         self.pipeline.add_pass(pass);
         self
     }
@@ -46,21 +35,14 @@ where
     }
 }
 
-impl<Language, Config> Default for CliBuilder<Language, Config>
-where
-    Config: Serialize + DeserializeOwned + Default,
-    Language: LanguageProvider,
-{
+impl<Language: LanguageProvider, Config: ConfigProvider> Default for CliBuilder<Language, Config> {
     fn default() -> Self {
         Self::new()
     }
 }
 
 #[must_use]
-pub fn cli_builder<Language, Config>() -> CliBuilder<Language, Config>
-where
-    Config: Serialize + DeserializeOwned + Default,
-    Language: LanguageProvider,
-{
+pub fn cli_builder<Language: LanguageProvider, Config: ConfigProvider>(
+) -> CliBuilder<Language, Config> {
     CliBuilder::new()
 }

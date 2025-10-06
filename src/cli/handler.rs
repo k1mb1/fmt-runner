@@ -1,9 +1,9 @@
 use crate::cli::cli_entry::{build_cli, CliCommand};
 use crate::cli::commands::{check, format, init};
 use crate::cli::error::{exit_with_error, CliError, CliResult};
+use crate::core::ConfigProvider;
 use crate::parser::LanguageProvider;
 use crate::pipeline::Pipeline;
-use serde::{de::DeserializeOwned, Serialize};
 use std::env;
 use std::path::{Path, PathBuf};
 
@@ -16,11 +16,7 @@ fn parse_command(cmd_str: &str) -> Option<CliCommand> {
     }
 }
 
-pub fn handle_cli<Language, Config>(pipeline: Pipeline<Config>)
-where
-    Config: Serialize + DeserializeOwned + Default,
-    Language: LanguageProvider,
-{
+pub fn handle_cli<Language: LanguageProvider, Config: ConfigProvider>(pipeline: Pipeline<Config>) {
     env_logger::Builder::from_default_env()
         .filter_level(log::LevelFilter::Warn)
         .init();
@@ -30,11 +26,9 @@ where
     }
 }
 
-fn try_handle_cli<Language, Config>(pipeline: Pipeline<Config>) -> CliResult<()>
-where
-    Config: Serialize + DeserializeOwned + Default,
-    Language: LanguageProvider,
-{
+fn try_handle_cli<Language: LanguageProvider, Config: ConfigProvider>(
+    pipeline: Pipeline<Config>,
+) -> CliResult<()> {
     let bin_name = get_binary_name().unwrap_or_else(|_| "fmt-runner".to_string());
     let matches = build_cli(&bin_name).get_matches();
 
@@ -75,10 +69,7 @@ fn get_binary_name() -> CliResult<String> {
         .ok_or(CliError::BinaryNameError)
 }
 
-fn handle_init_command<Config>(sub_matches: &clap::ArgMatches) -> CliResult<()>
-where
-    Config: Serialize + DeserializeOwned + Default,
-{
+fn handle_init_command<Config: ConfigProvider>(sub_matches: &clap::ArgMatches) -> CliResult<()> {
     let config_path = sub_matches
         .get_one::<String>("config_path")
         .ok_or(CliError::ConfigPathMissing)?;
@@ -87,14 +78,10 @@ where
     Ok(())
 }
 
-fn handle_format_command<Language, Config>(
+fn handle_format_command<Language: LanguageProvider, Config: ConfigProvider>(
     sub_matches: &clap::ArgMatches,
     pipeline: Pipeline<Config>,
-) -> CliResult<()>
-where
-    Config: Serialize + DeserializeOwned + Default,
-    Language: LanguageProvider,
-{
+) -> CliResult<()> {
     let config_path = sub_matches
         .get_one::<String>("config_path")
         .ok_or(CliError::ConfigPathMissing)?;
@@ -112,14 +99,10 @@ where
     Ok(())
 }
 
-fn handle_check_command<Language, Config>(
+fn handle_check_command<Language: LanguageProvider, Config: ConfigProvider>(
     sub_matches: &clap::ArgMatches,
     pipeline: Pipeline<Config>,
-) -> CliResult<()>
-where
-    Config: Serialize + DeserializeOwned + Default,
-    Language: LanguageProvider,
-{
+) -> CliResult<()> {
     let config_path = sub_matches
         .get_one::<String>("config_path")
         .ok_or(CliError::ConfigPathMissing)?;

@@ -1,23 +1,17 @@
 use crate::cli::commands::{ConfigLoader, FileCollector, FileReader};
 use crate::cli::error::CliResult;
-use crate::core::Engine;
+use crate::core::{ConfigProvider, Engine};
 use crate::parser::LanguageProvider;
 use crate::pipeline::Pipeline;
 use log::info;
-use serde::de::DeserializeOwned;
-use serde::Serialize;
 use std::path::{Path, PathBuf};
 
 /// Execute the format command - format files and write changes to disk.
-pub fn execute<Language, Config>(
+pub fn execute<Language: LanguageProvider, Config: ConfigProvider>(
     config_path: &Path,
     files_path: &[PathBuf],
     pipeline: Pipeline<Config>,
-) -> CliResult<()>
-where
-    Config: Serialize + DeserializeOwned + Default,
-    Language: LanguageProvider,
-{
+) -> CliResult<()> {
     let config = ConfigLoader::load::<Config>(config_path)?;
 
     let files = FileCollector::collect_all::<Language>(files_path);

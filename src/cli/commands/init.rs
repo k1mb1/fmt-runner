@@ -1,14 +1,11 @@
 use crate::cli::commands::ConfigLoader;
 use crate::cli::error::CliResult;
+use crate::core::ConfigProvider;
 use log::info;
-use serde::{de::DeserializeOwned, Serialize};
 use std::path::PathBuf;
 
 /// Execute the init command to create or validate a configuration file.
-pub fn execute<Config>(config_path: PathBuf) -> CliResult<()>
-where
-    Config: Serialize + DeserializeOwned + Default,
-{
+pub fn execute<Config: ConfigProvider>(config_path: PathBuf) -> CliResult<()> {
     if ConfigLoader::exists(&config_path)? {
         info!("Config file already exists, validating...");
         ConfigLoader::validate::<Config>(&config_path)?;

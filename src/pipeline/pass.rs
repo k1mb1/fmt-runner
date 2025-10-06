@@ -1,5 +1,5 @@
+use crate::core::ConfigProvider;
 use crate::pipeline::edit::Edit;
-use serde::{de::DeserializeOwned, Serialize};
 use tree_sitter::Node;
 
 /// Base trait for all formatting passes.
@@ -25,7 +25,7 @@ use tree_sitter::Node;
 /// ```
 pub trait Pass {
     /// The type of configuration for this pass
-    type Config: Serialize + DeserializeOwned;
+    type Config: ConfigProvider;
 
     /// Run the pass on the given AST and source code.
     ///
@@ -43,17 +43,14 @@ pub trait Pass {
 ///
 /// This trait allows storing passes with different associated types
 /// in a single collection by erasing the associated type information.
-pub trait ErasedPass<Config> {
+pub trait ErasedPass<Config: ConfigProvider> {
     /// Run the pass with the given configuration.
     fn run(&self, config: &Config, root: &Node, source: &str) -> Vec<Edit>;
 }
 
-impl<T> ErasedPass<<T as Pass>::Config> for T
-where
-    T: Pass,
-{
-    fn run(&self, config: &<T as Pass>::Config, root: &Node, source: &str) -> Vec<Edit> {
-        <T as Pass>::run(self, config, root, source)
+impl<T: Pass> ErasedPass<T::Config> for T {
+    fn run(&self, config: &<T>::Config, root: &Node, source: &str) -> Vec<Edit> {
+        <T>::run(self, config, root, source)
     }
 }
 
@@ -73,7 +70,7 @@ where
 /// 3. `build` - Generate the formatted text from items
 pub trait StructuredPass {
     /// The type of configuration
-    type Config: Serialize + DeserializeOwned;
+    type Config: ConfigProvider;
     /// The type of items being formatted
     type Item;
 
@@ -127,11 +124,8 @@ pub trait StructuredPass {
     fn build(&self, config: &Self::Config, items: &[Self::Item]) -> String;
 }
 
-impl<T> Pass for T
-where
-    T: StructuredPass,
-{
-    type Config = <T as StructuredPass>::Config;
+impl<T: StructuredPass> Pass for T {
+    type Config = T::Config;
 
     fn run(&self, config: &Self::Config, root: &Node, source: &str) -> Vec<Edit> {
         let mut edits = Vec::new();
