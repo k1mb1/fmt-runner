@@ -9,20 +9,6 @@ use serde::Serialize;
 use std::path::{Path, PathBuf};
 
 /// Execute the format command - format files and write changes to disk.
-///
-/// This function coordinates:
-/// 1. Configuration loading via ConfigLoader
-/// 2. File collection via FileCollector
-/// 3. File reading via FileReader (optimized for large files)
-/// 4. Formatting via Engine
-///
-/// # Arguments
-/// * `config_path` - Path to the configuration file
-/// * `files_path` - Paths to files or directories to format
-/// * `pipeline` - The formatting pipeline to apply
-///
-/// # Returns
-/// `Ok(())` on success, or a CLI error
 pub fn execute<Language, Config>(
     config_path: &Path,
     files_path: &[PathBuf],

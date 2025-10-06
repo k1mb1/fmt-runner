@@ -4,20 +4,7 @@ use log::debug;
 use std::marker::PhantomData;
 use std::path::PathBuf;
 
-/// The main formatting engine that coordinates parsing and pipeline execution.
-///
-/// The engine manages a parser and a pipeline of formatting passes, applying
-/// them to source code to produce formatted output.
-///
-/// # Type Parameters
-/// * `Language` - A type implementing `LanguageProvider` for language-specific parsing
-/// * `Config` - Configuration type passed to formatting passes
-///
-/// # Examples
-/// ```ignore
-/// let pipeline = Pipeline::new();
-/// let mut engine = Engine::<MyLanguage, MyConfig>::new(pipeline);
-/// ```
+// ...existing code...
 pub struct Engine<Language: LanguageProvider, Config> {
     pipeline: Pipeline<Config>,
     parser: Parser<Language>,
@@ -25,10 +12,6 @@ pub struct Engine<Language: LanguageProvider, Config> {
 }
 
 impl<Language: LanguageProvider, C> Engine<Language, C> {
-    /// Create a new engine with the given pipeline.
-    ///
-    /// # Arguments
-    /// * `pipeline` - The formatting pipeline to use
     pub fn new(pipeline: Pipeline<C>) -> Self {
         Self {
             pipeline,
@@ -37,15 +20,6 @@ impl<Language: LanguageProvider, C> Engine<Language, C> {
         }
     }
 
-    /// Run the pipeline on the given parse state.
-    ///
-    /// This method applies all passes in the pipeline sequentially,
-    /// collecting edits and applying them in reverse order to maintain
-    /// correct byte offsets.
-    ///
-    /// # Arguments
-    /// * `config` - Configuration to pass to each pass
-    /// * `state` - The parse state containing source and tree
     fn run(&mut self, config: &C, state: &mut ParseState) {
         // Ensure we have a parsed tree
         if !state.has_tree() {
@@ -78,18 +52,6 @@ impl<Language: LanguageProvider, C> Engine<Language, C> {
         }
     }
 
-    /// Check if files need formatting (returns list of files that would be changed).
-    ///
-    /// This method runs the pipeline on each file and compares the result
-    /// with the original content without writing changes to disk.
-    ///
-    /// # Arguments
-    /// * `config` - Configuration to pass to formatting passes
-    /// * `codes` - Source code contents of the files
-    /// * `files` - File paths corresponding to the source codes
-    ///
-    /// # Returns
-    /// A vector of file paths that would be changed by formatting
     pub fn check(&mut self, config: &C, codes: &[String], files: &[PathBuf]) -> Vec<PathBuf> {
         let mut changed_files = Vec::new();
 
@@ -105,22 +67,6 @@ impl<Language: LanguageProvider, C> Engine<Language, C> {
         changed_files
     }
 
-    /// Format files and write changes (returns list of files that were changed).
-    ///
-    /// This method runs the pipeline on each file, writes the formatted
-    /// content to disk if it differs from the original, and returns the
-    /// list of modified files.
-    ///
-    /// # Arguments
-    /// * `config` - Configuration to pass to formatting passes
-    /// * `codes` - Source code contents of the files
-    /// * `files` - File paths corresponding to the source codes
-    ///
-    /// # Returns
-    /// A `Result` containing a vector of changed file paths, or an IO error
-    ///
-    /// # Errors
-    /// Returns an error if writing to any file fails
     pub fn format_and_write(
         &mut self,
         config: &C,

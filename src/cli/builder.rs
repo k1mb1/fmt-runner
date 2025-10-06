@@ -4,9 +4,6 @@ use crate::pipeline::{Pass, Pipeline};
 use serde::{de::DeserializeOwned, Serialize};
 use std::marker::PhantomData;
 
-/// Builder for CLI runner with fluent interface
-///
-/// Add passes one by one using `add_pass` method
 pub struct CliBuilder<Language, Config>
 where
     Config: Serialize + DeserializeOwned + Default,
@@ -21,7 +18,6 @@ where
     Config: Serialize + DeserializeOwned + Default,
     Language: LanguageProvider,
 {
-    /// Create new CLI builder
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -30,7 +26,6 @@ where
         }
     }
 
-    /// Add pass to the pipeline
     #[must_use]
     pub fn add_pass<P>(mut self, pass: P) -> Self
     where
@@ -40,14 +35,12 @@ where
         self
     }
 
-    /// Set the pipeline to use
     #[must_use]
     pub fn with_pipeline(mut self, pipeline: Pipeline<Config>) -> Self {
         self.pipeline = pipeline;
         self
     }
 
-    /// Run the CLI
     pub fn run(self) {
         handle_cli::<Language, Config>(self.pipeline);
     }
@@ -63,7 +56,6 @@ where
     }
 }
 
-/// Create new CLI builder
 #[must_use]
 pub fn cli_builder<Language, Config>() -> CliBuilder<Language, Config>
 where

@@ -21,28 +21,10 @@ pub struct Pipeline<Config> {
 }
 
 impl<Config> Pipeline<Config> {
-    /// Create a new empty pipeline.
     pub fn new() -> Self {
         Self { passes: Vec::new() }
     }
 
-    /// Add a pass to the pipeline.
-    ///
-    /// Passes are executed in the order they are added.
-    ///
-    /// # Arguments
-    /// * `pass` - The pass to add to the pipeline
-    ///
-    /// # Returns
-    /// A mutable reference to self for method chaining
-    ///
-    /// # Examples
-    /// ```ignore
-    /// let mut pipeline = Pipeline::new();
-    /// pipeline
-    ///     .add_pass(FirstPass)
-    ///     .add_pass(SecondPass);
-    /// ```
     pub fn add_pass<P>(&mut self, pass: P) -> &mut Self
     where
         P: Pass<Config = Config> + 'static,
@@ -51,20 +33,14 @@ impl<Config> Pipeline<Config> {
         self
     }
 
-    /// Get a reference to the passes in this pipeline.
-    ///
-    /// # Returns
-    /// A slice of boxed erased passes
     pub fn passes(&self) -> &[Box<dyn ErasedPass<Config>>] {
         &self.passes
     }
 
-    /// Get the number of passes in the pipeline.
     pub fn len(&self) -> usize {
         self.passes.len()
     }
 
-    /// Check if the pipeline is empty.
     pub fn is_empty(&self) -> bool {
         self.passes.is_empty()
     }

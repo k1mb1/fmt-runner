@@ -8,15 +8,6 @@ use std::path::{Path, PathBuf};
 pub struct FileCollector;
 
 impl FileCollector {
-    /// Collect unique supported files from multiple paths.
-    ///
-    /// This function deduplicates files and returns them in sorted order.
-    ///
-    /// # Arguments
-    /// * `paths` - Array of paths to search
-    ///
-    /// # Returns
-    /// Sorted vector of unique file paths
     pub fn collect_all<Language: LanguageProvider>(paths: &[PathBuf]) -> Vec<PathBuf> {
         let mut files_set = HashSet::new();
         let mut files_vec = Vec::new();
@@ -32,13 +23,6 @@ impl FileCollector {
         files_vec
     }
 
-    /// Collect supported files from path (file or directory).
-    ///
-    /// # Arguments
-    /// * `root` - Root path to search from
-    ///
-    /// # Returns
-    /// Vector of supported file paths
     fn collect_from_path<Language: LanguageProvider>(root: &Path) -> Vec<PathBuf> {
         let mut files = Vec::new();
         let supported = Language::supported_extension();
@@ -54,7 +38,6 @@ impl FileCollector {
         files
     }
 
-    /// Helper: recursively walk directory and push supported files.
     fn collect_recursive(dir: &Path, supported: &SupportedExtension, files: &mut Vec<PathBuf>) {
         if let Ok(entries) = fs::read_dir(dir) {
             for entry in entries.flatten() {

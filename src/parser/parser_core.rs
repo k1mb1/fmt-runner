@@ -2,15 +2,12 @@ use crate::parser::language_provider::LanguageProvider;
 use crate::parser::parse_state::ParseState;
 use tree_sitter::{InputEdit, Parser as TsParser};
 
-/// Generic parser that owns a tree-sitter parser.
-/// The source and tree are managed separately in ParseState.
 pub struct Parser<Language: LanguageProvider> {
     ts_parser: TsParser,
     _marker: std::marker::PhantomData<Language>,
 }
 
 impl<Language: LanguageProvider> Parser<Language> {
-    /// Create a new parser for the language.
     pub fn new() -> Self {
         let mut ts_parser = TsParser::new();
         ts_parser
@@ -23,19 +20,14 @@ impl<Language: LanguageProvider> Parser<Language> {
         }
     }
 
-    /// Parse the source in the state from scratch.
     pub fn parse(&mut self, state: &mut ParseState) {
         state.tree = self.ts_parser.parse(&state.source, None);
     }
 
-    /// Incrementally reparse using the existing tree (if any).
     pub fn reparse(&mut self, state: &mut ParseState) {
         state.tree = self.ts_parser.parse(&state.source, state.tree.as_ref());
     }
 
-    /// Apply an edit to the source in the state and update tree-sitter's tree edit before reparsing.
-    ///
-    /// `start_byte..old_end_byte` will be replaced with `new_text`.
     pub fn apply_edit(
         &mut self,
         state: &mut ParseState,

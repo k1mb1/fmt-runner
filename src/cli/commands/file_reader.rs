@@ -22,13 +22,6 @@ impl Default for FileReader {
 }
 
 impl FileReader {
-    /// Read given files into strings with optimization for large files.
-    ///
-    /// # Arguments
-    /// * `files` - Array of file paths to read
-    ///
-    /// # Returns
-    /// Vector of file contents as strings, or first IO error encountered
     pub fn read_files(&self, files: &[PathBuf]) -> CliResult<Vec<String>> {
         let mut contents = Vec::with_capacity(files.len());
 
@@ -40,13 +33,6 @@ impl FileReader {
         Ok(contents)
     }
 
-    /// Read a single file with optimization for large files.
-    ///
-    /// # Arguments
-    /// * `file_path` - Path to the file to read
-    ///
-    /// # Returns
-    /// File content as a string
     fn read_file(&self, file_path: &PathBuf) -> CliResult<String> {
         let metadata = std::fs::metadata(file_path)?;
         let file_size = metadata.len() as usize;
@@ -63,14 +49,6 @@ impl FileReader {
         }
     }
 
-    /// Read a large file with buffering.
-    ///
-    /// # Arguments
-    /// * `file_path` - Path to the file to read
-    /// * `file_size` - Size of the file in bytes
-    ///
-    /// # Returns
-    /// File content as a string
     fn read_large_file(&self, file_path: &PathBuf, file_size: usize) -> CliResult<String> {
         let file = File::open(file_path)?;
         let mut reader = BufReader::with_capacity(self.buffer_size, file);

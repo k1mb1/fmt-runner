@@ -34,7 +34,6 @@ pub struct Edit<T = ()> {
 }
 
 impl Edit<()> {
-    /// Create a simple edit with content and no items.
     pub fn new(range: (usize, usize), content: String) -> Self {
         Self {
             range,
@@ -45,7 +44,6 @@ impl Edit<()> {
 }
 
 impl<T> Edit<T> {
-    /// Create an edit target with items to be processed.
     pub fn with_items(range: (usize, usize), items: Vec<T>) -> Self {
         Self {
             range,
@@ -54,7 +52,6 @@ impl<T> Edit<T> {
         }
     }
 
-    /// Convert this edit to a final edit with content.
     pub fn with_content(self, content: String) -> Edit<()> {
         Edit {
             range: self.range,

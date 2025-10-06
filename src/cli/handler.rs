@@ -7,13 +7,6 @@ use serde::{de::DeserializeOwned, Serialize};
 use std::env;
 use std::path::{Path, PathBuf};
 
-/// Parse command string to `CliCommand` enum.
-///
-/// # Arguments
-/// * `cmd_str` - The command string to parse
-///
-/// # Returns
-/// `Some(CliCommand)` if the string matches a known command, `None` otherwise
 fn parse_command(cmd_str: &str) -> Option<CliCommand> {
     match cmd_str {
         cmd if cmd == CliCommand::Init.as_str() => Some(CliCommand::Init),
@@ -23,27 +16,11 @@ fn parse_command(cmd_str: &str) -> Option<CliCommand> {
     }
 }
 
-/// Handle command line interface for the formatter tool
-///
-/// This function parses command line arguments and executes the appropriate command
-/// (init or format) based on the provided input.
-///
-/// # Type Parameters
-/// * `Language` - A type that implements `LanguageProvider` for language-specific operations
-/// * `Config` - Configuration type that can be serialized/deserialized
-///
-/// # Arguments
-/// * `pipeline` - The formatting pipeline to use for format operations
-///
-/// # Errors
-/// This function will print error messages to stderr and call `process::exit(1)`
-/// if any critical error occurs during CLI processing.
 pub fn handle_cli<Language, Config>(pipeline: Pipeline<Config>)
 where
     Config: Serialize + DeserializeOwned + Default,
     Language: LanguageProvider,
 {
-    // Initialize logger with default configuration
     env_logger::Builder::from_default_env()
         .filter_level(log::LevelFilter::Warn)
         .init();
@@ -53,7 +30,6 @@ where
     }
 }
 
-/// Internal implementation of CLI handling that returns Results
 fn try_handle_cli<Language, Config>(pipeline: Pipeline<Config>) -> CliResult<()>
 where
     Config: Serialize + DeserializeOwned + Default,
@@ -87,10 +63,6 @@ where
     Ok(())
 }
 
-/// Get the binary name from command line arguments.
-///
-/// # Returns
-/// The binary name without path, or an error if it cannot be determined
 fn get_binary_name() -> CliResult<String> {
     env::args()
         .next()
@@ -103,13 +75,6 @@ fn get_binary_name() -> CliResult<String> {
         .ok_or(CliError::BinaryNameError)
 }
 
-/// Handle the 'init' subcommand.
-///
-/// # Arguments
-/// * `sub_matches` - Command line argument matches for the init subcommand
-///
-/// # Returns
-/// `Ok(())` on success, or a CLI error
 fn handle_init_command<Config>(sub_matches: &clap::ArgMatches) -> CliResult<()>
 where
     Config: Serialize + DeserializeOwned + Default,
@@ -122,14 +87,6 @@ where
     Ok(())
 }
 
-/// Handle the 'format' subcommand.
-///
-/// # Arguments
-/// * `sub_matches` - Command line argument matches for the format subcommand
-/// * `pipeline` - The formatting pipeline to use
-///
-/// # Returns
-/// `Ok(())` on success, or a CLI error
 fn handle_format_command<Language, Config>(
     sub_matches: &clap::ArgMatches,
     pipeline: Pipeline<Config>,
@@ -155,14 +112,6 @@ where
     Ok(())
 }
 
-/// Handle the 'check' subcommand.
-///
-/// # Arguments
-/// * `sub_matches` - Command line argument matches for the check subcommand
-/// * `pipeline` - The formatting pipeline to use
-///
-/// # Returns
-/// `Ok(())` on success, or a CLI error
 fn handle_check_command<Language, Config>(
     sub_matches: &clap::ArgMatches,
     pipeline: Pipeline<Config>,

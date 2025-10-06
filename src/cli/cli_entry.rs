@@ -16,7 +16,6 @@ impl CliCommand {
     const FORMAT: &'static str = "format";
     const CHECK: &'static str = "check";
 
-    /// Get the string representation of the CLI command.
     pub fn as_str(self) -> &'static str {
         match self {
             CliCommand::Init => Self::INIT,
@@ -27,20 +26,11 @@ impl CliCommand {
 }
 
 /// Get config filename by binary name.
-///
-/// # Arguments
-/// * `bin_name` - The name of the binary
-///
-/// # Returns
-/// The default configuration filename (e.g., "mybin.yml")
 fn default_config_name(bin_name: &str) -> String {
     format!("{bin_name}.yml")
 }
 
 /// Create a config argument with a default value.
-///
-/// # Arguments
-/// * `default` - The default config filename
 fn config_arg(default: &'static str) -> Arg {
     Arg::new("config_path")
         .short('c')
@@ -51,12 +41,6 @@ fn config_arg(default: &'static str) -> Arg {
 }
 
 /// Build CLI with dynamic binary and config names.
-///
-/// # Arguments
-/// * `bin_name` - The name of the binary (used for help text and defaults)
-///
-/// # Returns
-/// A configured `Command` ready to parse arguments
 pub fn build_cli(bin_name: &str) -> Command {
     let bin_name_leaked: &'static str = Box::leak(bin_name.to_string().into_boxed_str());
     let config_leaked: &'static str = Box::leak(default_config_name(bin_name).into_boxed_str());
